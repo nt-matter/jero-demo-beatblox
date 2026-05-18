@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BeatBlox Studio — Bright Studio v2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@400;500;600;700;800;900;950&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ─── TOKENS ──────────────────────────────────────── */
+    :root {
+      --bg:     #FFFDF5;
+      --bg2:    #F2F0E8;
+      --ink:    #111111;
+      --pink:   #FF1E9E;
+      --green:  #1DC400;
+      --cyan:   #00B7FF;
+      --blue:   #3B4CFF;
+      --purple: #8B00FF;
+      --yellow: #FFE600;
+      --orange: #FF6B00;
+      --r:      24px;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-thumb { background:var(--pink); border-radius:2px; }
+
+    /* ─── NAVBAR ──────────────────────────────────────── */
+    nav {
+      position: fixed;
+      inset: 0 0 auto;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 52px;
+      height: 72px;
+      background: #111;
+      transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: 0 4px 32px rgba(0,0,0,.4); }
+
+    .nav-logo-img { height: 52px; width: auto; }
+
+    .nav-links { display:flex; gap:32px; list-style:none; }
+    .nav-links a {
+      color: rgba(255,255,255,.45);
+      text-decoration:none;
+      font-size:.82rem; font-weight:800;
+      letter-spacing:2px; text-transform:uppercase;
+      transition: color .2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content:'';
+      position:absolute; bottom:-4px; left:0; width:100%; height:2px;
+      background: var(--pink);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .25s;
+    }
+    .nav-links a:hover { color:#fff; }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a[aria-current="page"] { color:#fff; pointer-events:none; }
+    .nav-links a[aria-current="page"]::after { transform: scaleX(1); }
+
+    .nav-cta {
+      background: var(--pink); color:#fff;
+      border: none; padding: 10px 26px;
+      font-family:'Nunito',sans-serif;
+      font-size:.82rem; font-weight:900;
+      letter-spacing:1.5px; text-transform:uppercase;
+      border-radius: 100px; cursor:pointer;
+      transition: all .25s;
+      box-shadow: 0 4px 18px rgba(255,30,158,.4);
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(255,30,158,.5);
+    }
+
+    /* ─── HERO ────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 110px 48px 100px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* ── Animated blob background ── */
+    .blob-wrap { position:absolute; inset:0; z-index:0; overflow:hidden; }
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: .7;
+    }
+    .blob-1 {
+      width:640px; height:640px; top:-120px; left:-120px;
+      background: rgba(255,30,158,.16);
+      animation: drift1 16s ease-in-out infinite alternate;
+    }
+    .blob-2 {
+      width:520px; height:520px; top:15%; right:-80px;
+      background: rgba(0,183,255,.15);
+      animation: drift2 12s ease-in-out infinite alternate;
+    }
+    .blob-3 {
+      width:700px; height:700px; bottom:-180px; left:15%;
+      background: rgba(255,230,0,.16);
+      animation: drift3 18s ease-in-out infinite alternate;
+    }
+    .blob-4 {
+      width:420px; height:420px; top:35%; left:38%;
+      background: rgba(29,196,0,.12);
+      animation: drift4 14s ease-in-out infinite alternate;
+    }
+    .blob-5 {
+      width:380px; height:380px; bottom:12%; right:8%;
+      background: rgba(139,0,255,.11);
+      animation: drift1 20s ease-in-out infinite alternate-reverse;
+    }
+    @keyframes drift1 {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(50px,-40px) scale(1.1); }
+      100% { transform: translate(-20px, 30px) scale(.95); }
+    }
+    @keyframes drift2 {
+      0%   { transform: translate(0,0) scale(1); }
+      50%  { transform: translate(-40px, 50px) scale(.92); }
+      100% { transform: translate(30px,-25px) scale(1.08); }
+    }
+    @keyframes drift3 {
+      0%   { transform: translate(0,0) scale(1); }
+      50%  { transform: translate(35px, -45px) scale(1.06); }
+      100% { transform: translate(-30px, 20px) scale(.96); }
+    }
+    @keyframes drift4 {
+      0%   { transform: translate(0,0) scale(1) rotate(0deg); }
+      50%  { transform: translate(-25px,-35px) scale(1.12) rotate(8deg); }
+      100% { transform: translate(40px, 30px) scale(.9) rotate(-6deg); }
+    }
+
+    /* ── CSS Particles ── */
+    .particles-wrap {
+      position: absolute; inset: 0; z-index: 1;
+      overflow: hidden; pointer-events: none;
+    }
+    .p-dot {
+      position: absolute;
+      border-radius: 50%;
+      animation: particleFloat linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes particleFloat {
+      0%   { transform: translateY(0) scale(1);   opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: .7; }
+      100% { transform: translateY(-120px) scale(.4); opacity: 0; }
+    }
+
+    /* ── Floating shapes decoration ── */
+    .float-shape {
+      position: absolute;
+      z-index: 1;
+      pointer-events: none;
+      animation: floatUp 6s ease-in-out infinite;
+    }
+    .fs-1 {
+      width:60px; height:60px; top:18%; left:8%;
+      background: var(--pink); border-radius:16px;
+      opacity:.18; animation-delay:0s; animation-duration:7s;
+      transform: rotate(25deg);
+    }
+    .fs-2 {
+      width:40px; height:40px; top:25%; right:10%;
+      background: var(--cyan); border-radius:50%;
+      opacity:.22; animation-delay:-2s; animation-duration:8s;
+    }
+    .fs-3 {
+      width:50px; height:50px; bottom:22%; left:6%;
+      background: var(--yellow); border-radius:12px;
+      opacity:.2; animation-delay:-4s; animation-duration:6.5s;
+      transform: rotate(-18deg);
+    }
+    .fs-4 {
+      width:35px; height:35px; bottom:30%; right:7%;
+      background: var(--green); border-radius:50%;
+      opacity:.18; animation-delay:-1.5s; animation-duration:9s;
+    }
+    .fs-5 {
+      width:70px; height:12px; top:60%; left:12%;
+      background: var(--pink); border-radius:6px;
+      opacity:.15; animation-delay:-3s; animation-duration:7.5s;
+    }
+    .fs-6 {
+      width:12px; height:70px; top:40%; right:13%;
+      background: var(--yellow); border-radius:6px;
+      opacity:.15; animation-delay:-5s; animation-duration:8.5s;
+    }
+    @keyframes floatUp {
+      0%,100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+      50%      { transform: translateY(-16px) rotate(var(--r, 0deg)); }
+    }
+
+    /* ── Hero content ── */
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 860px;
+    }
+
+    /* ── Sticker logo ── */
+    .hero-logo-sticker {
+      display: inline-block;
+      background: #111;
+      border-radius: 18px;
+      padding: 20px 36px;
+      margin-bottom: 36px;
+      position: relative;
+      transform: rotate(-2.5deg);
+      box-shadow:
+        6px 6px 0 var(--pink),
+        10px 10px 0 rgba(255,30,158,.18),
+        0 24px 48px rgba(0,0,0,.15);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
+    }
+    .hero-logo-sticker:hover {
+      transform: rotate(0deg) scale(1.04);
+      box-shadow:
+        8px 8px 0 var(--pink),
+        14px 14px 0 rgba(255,30,158,.18),
+        0 32px 56px rgba(0,0,0,.18);
+    }
+    /* tape strip top */
+    .hero-logo-sticker::before {
+      content: '';
+      position: absolute;
+      top: -10px; left: 50%;
+      transform: translateX(-50%) rotate(-1deg);
+      width: 56px; height: 18px;
+      background: rgba(255,230,0,.7);
+      border-radius: 3px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.12);
+    }
+    /* border glow */
+    .hero-logo-sticker::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      border: 1.5px solid rgba(255,30,158,.35);
+      pointer-events: none;
+    }
+    .hero-logo-img { height: 130px; width: auto; display:block; position:relative; z-index:1; }
+
+    .hero-studio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--ink);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      padding: 8px 22px;
+      border-radius: 100px;
+      margin-bottom: 36px;
+    }
+    .studio-dot {
+      width:7px; height:7px; border-radius:50%;
+      background: var(--pink);
+      box-shadow: 0 0 10px var(--pink);
+      animation: pulseDot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseDot {
+      0%,100% { transform:scale(1); opacity:1; }
+      50%      { transform:scale(1.5); opacity:.6; }
+    }
+
+    .hero-tagline {
+      font-family: 'Righteous', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 7rem);
+      line-height: 1.05;
+      margin-bottom: 28px;
+      color: var(--ink);
+    }
+    .t-pink   { color: var(--pink); }
+    .t-green  { color: var(--green); }
+    .t-blue   { color: var(--blue); }
+
+    .hero-body {
+      font-size: clamp(.95rem, 1.8vw, 1.12rem);
+      color: rgba(0,0,0,.5);
+      line-height: 1.75;
+      max-width: 580px;
+      margin: 0 auto 24px;
+      font-weight: 600;
+    }
+
+    .platforms {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 22px 0 36px;
+    }
+    .pill {
+      padding: 7px 18px;
+      border-radius: 100px;
+      border: 2px solid rgba(0,0,0,.12);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(0,0,0,.4);
+      transition: all .2s;
+    }
+    .pill:hover { border-color: var(--pink); color: var(--pink); }
+
+    .hero-ctas { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items:center; gap:8px;
+      background: var(--ink); color: var(--bg);
+      padding: 16px 38px; border-radius:100px;
+      font-family:'Nunito',sans-serif; font-weight:900;
+      font-size:.95rem; letter-spacing:1.5px; text-transform:uppercase;
+      text-decoration:none; transition: all .3s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 6px 24px rgba(0,0,0,.22);
+    }
+    .btn-primary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px rgba(0,0,0,.28);
+    }
+    .btn-secondary {
+      display: inline-flex; align-items:center; gap:8px;
+      background: var(--pink); color: #fff;
+      padding: 16px 38px; border-radius:100px;
+      font-family:'Nunito',sans-serif; font-weight:900;
+      font-size:.95rem; letter-spacing:1.5px; text-transform:uppercase;
+      text-decoration:none; transition: all .3s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 6px 24px rgba(255,30,158,.35);
+    }
+    .btn-secondary:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px rgba(255,30,158,.45);
+    }
+
+    /* ── Soundwave bottom hero ── */
+    .soundwave-wrap {
+      position:absolute; bottom:0; left:0; right:0; height:64px;
+      display:flex; align-items:flex-end; justify-content:center; gap:3px;
+      padding: 0 16px; z-index:2; pointer-events:none; overflow:hidden;
+    }
+    .sw-bar {
+      width:3px; border-radius:2px 2px 0 0;
+      animation: swAnim ease-in-out infinite alternate;
+      opacity: .25;
+    }
+    @keyframes swAnim { 0%{transform:scaleY(.08)} 100%{transform:scaleY(1)} }
+
+    /* ─── MARQUEE ─────────────────────────────────────── */
+    .marquee-section {
+      background: #111;
+      overflow: hidden;
+      cursor: default;
+      user-select: none;
+      margin-top: 0;
+    }
+    .marquee-row {
+      display:flex; overflow:hidden; padding:14px 0;
+      mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    }
+    .marquee-row + .marquee-row { border-top:1px solid rgba(255,255,255,.06); }
+    .marquee-track {
+      display:flex; align-items:center; gap:10px;
+      flex-shrink:0; will-change:transform;
+    }
+    .row-left  .marquee-track { animation: mLeft  28s linear infinite; }
+    .row-right .marquee-track { animation: mRight 34s linear infinite; }
+    .marquee-section:hover .marquee-track { animation-play-state:paused; }
+    @keyframes mLeft  { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    @keyframes mRight { 0%{transform:translateX(-50%)} 100%{transform:translateX(0)} }
+
+    .mtag {
+      display:inline-flex; align-items:center; gap:9px;
+      padding:9px 22px;
+      border:1.5px solid; border-radius:100px;
+      white-space:nowrap;
+      font-size:.8rem; font-weight:800;
+      letter-spacing:2px; text-transform:uppercase; flex-shrink:0;
+    }
+    .mtag .d { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .c-pink   { color:#FF1E9E; border-color:rgba(255,30,158,.3); }
+    .c-pink   .d { background:#FF1E9E; }
+    .c-blue   { color:#00B7FF; border-color:rgba(0,183,255,.3); }
+    .c-blue   .d { background:#00B7FF; }
+    .c-green  { color:#7FFF00; border-color:rgba(127,255,0,.3); }
+    .c-green  .d { background:#7FFF00; }
+    .c-yellow { color:#FFE600; border-color:rgba(255,230,0,.3); }
+    .c-yellow .d { background:#FFE600; }
+    .c-purple { color:#B04DFF; border-color:rgba(139,0,255,.3); }
+    .c-purple .d { background:#B04DFF; }
+    .c-cyan   { color:#00F0FF; border-color:rgba(0,240,255,.3); }
+    .c-cyan   .d { background:#00F0FF; }
+    .c-orange { color:#FF7A00; border-color:rgba(255,122,0,.3); }
+    .c-orange .d { background:#FF7A00; }
+
+    /* ─── SECTION SHARED ─────────────────────────────── */
+    .sec-header {
+      text-align:center;
+      padding: 88px 48px 52px;
+    }
+    .sec-label {
+      display:inline-block;
+      background: rgba(0,0,0,.07);
+      color: rgba(0,0,0,.4);
+      font-size:.7rem; font-weight:900;
+      letter-spacing:5px; text-transform:uppercase;
+      padding: 7px 20px; border-radius:100px;
+      margin-bottom:18px;
+    }
+    .sec-title {
+      font-family: 'Righteous', sans-serif;
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      text-transform:uppercase; color:var(--ink); line-height:1;
+    }
+    .sec-title em { font-style:normal; color:var(--pink); }
+
+    /* ─── MODULE 1 — WORK CAROUSEL ───────────────────── */
+    .work-carousel {
+      background: var(--bg);
+      padding-bottom: 80px;
+      overflow: hidden;
+    }
+    .car-row {
+      display:flex; overflow:hidden; padding:12px 0;
+      mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+      cursor:default; user-select:none;
+    }
+    .car-track {
+      display:flex; gap:20px; flex-shrink:0; will-change:transform;
+    }
+    .car-left  .car-track { animation: mLeft  22s linear infinite; }
+    .car-right .car-track { animation: mRight 26s linear infinite; }
+    .work-carousel:hover .car-track { animation-play-state:paused; }
+
+    .car-card {
+      flex-shrink:0;
+      width: 400px; height: 270px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), box-shadow .4s;
+    }
+    .car-card:hover {
+      transform: scale(1.05) translateY(-8px) rotate(-1.5deg);
+      box-shadow: 0 24px 56px rgba(0,0,0,.16), 0 0 0 3px var(--card-glow);
+    }
+    .car-card-overlay {
+      position:absolute; inset:0;
+      background: linear-gradient(to top, rgba(0,0,0,.8) 0%, rgba(0,0,0,.15) 55%, transparent 100%);
+    }
+    .car-play {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%) scale(0);
+      width:54px; height:54px; border-radius:50%;
+      background:rgba(255,255,255,.22); backdrop-filter:blur(8px);
+      border:2px solid rgba(255,255,255,.45);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.2rem; color:#fff;
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s;
+      opacity:0;
+    }
+    .car-card:hover .car-play { transform:translate(-50%,-50%) scale(1); opacity:1; }
+    .car-card-info {
+      position:absolute; bottom:0; left:0; right:0; padding:20px 22px;
+    }
+    .car-cat {
+      font-size:.62rem; font-weight:900; letter-spacing:2.5px;
+      text-transform:uppercase; color:rgba(255,255,255,.75); margin-bottom:6px;
+    }
+    .car-title {
+      font-family:'Righteous',sans-serif;
+      font-size:1.2rem; color:#fff; line-height:1.15;
+    }
+
+    /* ─── MODULE 2 — HOVER GRID ───────────────────────── */
+    .work-grid-section {
+      background: var(--bg2);
+      padding-bottom: 0;
+    }
+    .wg-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 0 48px 80px;
+    }
+    .wg-card {
+      position: relative;
+      height: 500px;
+      overflow: hidden;
+      cursor: pointer;
+      border-radius: 26px;
+      background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+      box-shadow: 0 8px 40px rgba(0,0,0,.1);
+      transition: transform .45s cubic-bezier(.34,1.56,.64,1), box-shadow .45s;
+    }
+    .wg-card:hover {
+      transform: translateY(-10px) rotate(.6deg);
+      box-shadow: 0 28px 60px rgba(0,0,0,.16);
+    }
+    .wg-card-overlay {
+      position:absolute; inset:0;
+      background: linear-gradient(to top,
+        rgba(0,0,0,.90) 0%, rgba(0,0,0,.25) 50%, rgba(0,0,0,.0) 100%);
+      transition: background .45s;
+    }
+    .wg-card:hover .wg-card-overlay {
+      background: linear-gradient(to top,
+        rgba(0,0,0,.82) 0%, rgba(0,0,0,.12) 45%, rgba(0,0,0,.0) 100%);
+    }
+    .wg-playing {
+      position:absolute; top:22px; left:22px; z-index:4;
+      display:flex; align-items:center; gap:7px;
+      background:rgba(255,255,255,.18); backdrop-filter:blur(10px);
+      border:1.5px solid rgba(255,255,255,.3);
+      padding:7px 16px; border-radius:100px;
+      font-size:.6rem; font-weight:900; letter-spacing:2px;
+      text-transform:uppercase; color:#fff;
+      opacity:0; transform:translateY(-8px);
+      transition: opacity .4s .1s, transform .4s .1s;
+    }
+    .blink-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:#fff; animation:blink 1s ease-in-out infinite;
+    }
+    .wg-card:hover .wg-playing { opacity:1; transform:translateY(0); }
+    .wg-info {
+      position:absolute; bottom:0; left:0; right:0; z-index:4;
+      padding:28px 30px;
+      transform:translateY(6px); transition:transform .4s;
+    }
+    .wg-card:hover .wg-info { transform:translateY(0); }
+    .wg-cat {
+      font-size:.65rem; font-weight:900; letter-spacing:3px;
+      text-transform:uppercase; color:rgba(255,255,255,.65);
+      display:block; margin-bottom:8px;
+    }
+    .wg-title {
+      font-family:'Righteous',sans-serif;
+      font-size:2.1rem; color:#fff; line-height:1.1; margin-bottom:10px;
+    }
+    .wg-sub { font-size:.82rem; color:rgba(255,255,255,.5); font-weight:500; margin-bottom:16px; }
+    .wg-cta {
+      display:inline-flex; align-items:center; gap:8px;
+      font-size:.7rem; font-weight:900; letter-spacing:2px;
+      text-transform:uppercase; color:#fff;
+      background:rgba(255,255,255,.18); backdrop-filter:blur(8px);
+      border:1.5px solid rgba(255,255,255,.25);
+      padding:9px 20px; border-radius:100px;
+      opacity:0; transform:translateY(6px);
+      transition: opacity .35s .15s, transform .35s .15s;
+    }
+    .wg-card:hover .wg-cta { opacity:1; transform:translateY(0); }
+
+    @media (max-width:900px) {
+      .wg-grid { grid-template-columns:1fr; padding:0 24px 60px; }
+      .wg-card { height:340px; }
+    }
+
+    /* ─── TEASER / CTA ────────────────────────────────── */
+    .teaser {
+      background: var(--pink);
+      padding: 96px 48px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    /* Pink section blobs */
+    .teaser::before {
+      content:'';
+      position:absolute; inset:0; z-index:0;
+      background:
+        radial-gradient(ellipse 50% 80% at 10% 50%, rgba(255,255,255,.12), transparent),
+        radial-gradient(ellipse 40% 60% at 90% 20%, rgba(0,0,0,.1), transparent);
+    }
+    .teaser > * { position:relative; z-index:1; }
+    .teaser-title {
+      font-family:'Righteous',sans-serif;
+      font-size: clamp(2rem, 5vw, 4.8rem);
+      color:#fff; text-transform:uppercase;
+      line-height:1.05; margin-bottom:20px;
+    }
+    .teaser-title span { color:var(--yellow); }
+    .teaser-sub {
+      font-size:1rem; color:rgba(255,255,255,.65);
+      font-weight:600; margin-bottom:40px; letter-spacing:.5px;
+    }
+    .teaser-cta {
+      display:inline-flex; align-items:center; gap:10px;
+      background:#fff; color:var(--pink);
+      padding:18px 44px; border-radius:100px;
+      font-family:'Nunito',sans-serif; font-weight:900;
+      font-size:1rem; letter-spacing:1.5px; text-transform:uppercase;
+      text-decoration:none; transition:all .3s cubic-bezier(.34,1.56,.64,1);
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+    }
+    .teaser-cta:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 18px 44px rgba(0,0,0,.2);
+    }
+
+    /* ─── FOOTER ──────────────────────────────────────── */
+    .foot-strip {
+      background: #111;
+      padding:24px 52px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .foot-logo { height:34px; width:auto; opacity:.4; }
+    .foot-note {
+      font-size:.72rem; letter-spacing:2.5px;
+      text-transform:uppercase; color:rgba(255,255,255,.2);
+    }
+    .foot-dot {
+      width:8px; height:8px; border-radius:50%;
+      background:var(--pink); box-shadow:0 0 12px var(--pink);
+      animation:blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+    /* ─── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width:900px) {
+      nav { padding:0 24px; }
+      .nav-links { display:none; }
+      .hero { padding:110px 28px 90px; }
+      .hero-tagline { font-size:clamp(2.2rem,8vw,4rem); }
+      .sec-header { padding:64px 28px 40px; }
+      .work-carousel { padding-bottom:56px; }
+      .teaser { padding:64px 28px; }
+      .foot-strip { padding:20px 28px; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ NAVBAR -->
+<nav id="navbar">
+  <a href="index.html">
+    <img src="imagen/logo-base.png" alt="BeatBlox" class="nav-logo-img" />
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Hero</a></li>
+    <li><a href="beatblox-demo-hero-video.html">Hero Video</a></li>
+    <li><a href="beatblox-demo-v2.html" aria-current="page">Bright Studio</a></li>
+    <li><a href="beatblox-demo-v3.html">Studio Session</a></li>
+  </ul>
+  <button class="nav-cta">Start a Project</button>
+</nav>
+
+<!-- ══════════════════════ HERO -->
+<section class="hero">
+
+  <!-- CSS Particles -->
+  <div class="particles-wrap" id="particles"></div>
+
+  <!-- Animated blob bg -->
+  <div class="blob-wrap">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+  </div>
+
+  <!-- Floating geometric shapes -->
+  <div class="float-shape fs-1"></div>
+  <div class="float-shape fs-2"></div>
+  <div class="float-shape fs-3"></div>
+  <div class="float-shape fs-4"></div>
+  <div class="float-shape fs-5"></div>
+  <div class="float-shape fs-6"></div>
+
+  <!-- Content -->
+  <div class="hero-content">
+
+    <div class="hero-logo-sticker">
+      <img src="imagen/logo-base.png" alt="BeatBlox" class="hero-logo-img" />
+    </div>
+
+    <div class="hero-studio-badge">
+      <span class="studio-dot"></span>
+      Creative Studio
+    </div>
+
+    <h1 class="hero-tagline">
+      <span class="t-pink">Cool songs.</span><br>
+      <span class="t-green">Wild characters.</span><br>
+      <span class="t-blue">Positive stories.</span>
+    </h1>
+
+    <p class="hero-body">
+      BeatBlox Studio makes music-driven animated videos, colorful characters
+      and AI-powered visual stories — for kids, families, creators and brands.
+    </p>
+
+    <div class="platforms">
+      <span class="pill">YouTube</span>
+      <span class="pill">TikTok</span>
+      <span class="pill">Instagram</span>
+      <span class="pill">Shorts</span>
+      <span class="pill">Reels</span>
+      <span class="pill">Facebook</span>
+    </div>
+
+    <div class="hero-ctas">
+      <a href="#" class="btn-primary">Start a Project</a>
+      <a href="https://www.youtube.com/channel/UCgWg4iu5KpJBNjA1kAadmeg/"
+         target="_blank" class="btn-secondary">▶ Watch on YouTube</a>
+    </div>
+
+  </div>
+
+  <!-- Soundwave -->
+  <div class="soundwave-wrap" id="soundwave"></div>
+
+</section>
+
+<!-- ══════════════════════ MARQUEE -->
+<section class="marquee-section">
+  <div class="marquee-row row-left">
+    <div class="marquee-track" id="row1"></div>
+  </div>
+  <div class="marquee-row row-right">
+    <div class="marquee-track" id="row2"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════ MODULE 1 — WORK CAROUSEL -->
+<section class="work-carousel">
+  <div class="sec-header">
+    <span class="sec-label">/ Our Work</span>
+    <h2 class="sec-title">Stuff We Love <em>to Make</em></h2>
+  </div>
+  <div class="car-row car-left">
+    <div class="car-track" id="carRow1"></div>
+  </div>
+  <div style="height:20px"></div>
+  <div class="car-row car-right">
+    <div class="car-track" id="carRow2"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════ MODULE 2 — HOVER GRID -->
+<section class="work-grid-section">
+  <div class="sec-header">
+    <span class="sec-label">/ In Action</span>
+    <h2 class="sec-title">Work in <em>Action</em></h2>
+  </div>
+  <div class="wg-grid" id="wgGrid"></div>
+</section>
+
+<!-- ══════════════════════ TEASER -->
+<section class="teaser">
+  <h2 class="teaser-title">
+    Ready to make something<br><span>incredible?</span>
+  </h2>
+  <p class="teaser-sub">Services · Portfolio · Process · YouTube Channel — coming soon</p>
+  <a href="#" class="teaser-cta">Start a Project →</a>
+</section>
+
+<!-- ══════════════════════ FOOTER -->
+<footer class="foot-strip">
+  <img src="imagen/logo-base.png" alt="BeatBlox" class="foot-logo" />
+  <span class="foot-note">Demo v2 — Bright Studio</span>
+  <div class="foot-dot"></div>
+</footer>
+
+
+<script>
+/* ══════════════ SOUNDWAVE */
+(function(){
+  const wrap = document.getElementById('soundwave');
+  const COLS = ['#FF1E9E','#A020FF','#00B7FF','#1DC400','#FFE600','#FF6B00'];
+  for(let i=0;i<90;i++){
+    const b = document.createElement('div');
+    b.className = 'sw-bar';
+    const h   = Math.random()*44+8;
+    const dur = (Math.random()*1.2+.4).toFixed(2);
+    const del = (Math.random()*2).toFixed(2);
+    const col = COLS[Math.floor(Math.random()*COLS.length)];
+    b.style.cssText = `height:${h}px;background:${col};opacity:.22;animation-duration:${dur}s;animation-delay:-${del}s;`;
+    wrap.appendChild(b);
+  }
+})();
+
+/* ══════════════ MARQUEE */
+(function(){
+  const r1=[
+    {l:'Animated Music Videos',c:'c-pink'},{l:'Original Characters',c:'c-blue'},
+    {l:'AI Video Production',c:'c-purple'},{l:'Family Storytelling',c:'c-green'},
+    {l:'YouTube Content',c:'c-yellow'},{l:'Branded Entertainment',c:'c-orange'},
+    {l:'Music Visualizers',c:'c-cyan'},{l:'Animated Shorts',c:'c-pink'},
+    {l:'Brand Campaigns',c:'c-blue'},{l:'Sing-Along Songs',c:'c-green'},
+    {l:'Character Franchises',c:'c-purple'},{l:'Social Reels',c:'c-orange'},
+  ];
+  const r2=[
+    {l:'Neon Energy',c:'c-cyan'},{l:'Urban Beats',c:'c-pink'},
+    {l:'YouTube',c:'c-orange'},{l:'Motion First',c:'c-purple'},
+    {l:'TikTok',c:'c-blue'},{l:'Graffiti Style',c:'c-green'},
+    {l:'Instagram Reels',c:'c-yellow'},{l:'Cinematic',c:'c-pink'},
+    {l:'Family Friendly',c:'c-cyan'},{l:'AI-Powered',c:'c-purple'},
+    {l:'Facebook Shorts',c:'c-blue'},{l:'Immersive Worlds',c:'c-orange'},
+  ];
+  function build(tags){
+    return tags.map(t=>`<span class="mtag ${t.c}"><span class="d"></span>${t.l}</span>`).join('');
+  }
+  document.getElementById('row1').innerHTML = build(r1)+build(r1);
+  document.getElementById('row2').innerHTML = build(r2)+build(r2);
+})();
+
+/* ══════════════ MODULE 1 — CAROUSEL */
+(function(){
+  const row1Data = [
+    { title:'Rhythm World',    cat:'Animated Series',       c1:'#FF1E9E', c2:'#A020FF', glow:'#FF1E9E' },
+    { title:'Beat Drop Vol.1', cat:'Music Video',           c1:'#00B7FF', c2:'#3B4CFF', glow:'#00B7FF' },
+    { title:'Neon Pack',       cat:'Character Design',      c1:'#1DC400', c2:'#00F0FF', glow:'#1DC400' },
+    { title:'Color Splash',    cat:'Brand Campaign',        c1:'#FF6B00', c2:'#FF1E9E', glow:'#FF6B00' },
+  ];
+  const row2Data = [
+    { title:'Kids Jam Vol.2',  cat:'Family Content',        c1:'#00F0FF', c2:'#3B4CFF', glow:'#00F0FF' },
+    { title:'Boom Box',        cat:'Branded Entertainment', c1:'#FF1E9E', c2:'#FFE600', glow:'#FF1E9E' },
+    { title:'Bass Line',       cat:'Music Visualizer',      c1:'#00B7FF', c2:'#8B00FF', glow:'#00B7FF' },
+    { title:'Wild Crew',       cat:'Character Pack',        c1:'#8B00FF', c2:'#1DC400', glow:'#8B00FF' },
+  ];
+
+  function buildCard(d) {
+    return `
+      <div class="car-card" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}">
+        <div class="car-card-overlay"></div>
+        <div class="car-play">▶</div>
+        <div class="car-card-info">
+          <div class="car-cat">${d.cat}</div>
+          <div class="car-title">${d.title}</div>
+        </div>
+      </div>`;
+  }
+
+  function fill(id, data) {
+    const el  = document.getElementById(id);
+    const html = data.map(buildCard).join('');
+    el.innerHTML = html + html;
+  }
+  fill('carRow1', row1Data);
+  fill('carRow2', row2Data);
+})();
+
+/* ══════════════ MODULE 2 — HOVER GRID */
+(function(){
+  const projects = [
+    { title:'Rhythm World',    cat:'AI Animation',       sub:'Animated music series for kids & families',    c1:'#FF1E9E', c2:'#8B00FF' },
+    { title:'Beat Drop Vol.1', cat:'Music Video',        sub:'AI-powered audiovisual storytelling',           c1:'#00B7FF', c2:'#3B4CFF' },
+    { title:'Neon Pack Vol.1', cat:'Original Characters',sub:'Character design, animation & world-building',  c1:'#1DC400', c2:'#00F0FF' },
+    { title:'Color Splash',    cat:'Brand Campaign',     sub:'Creative campaign built for social & digital',  c1:'#FF6B00', c2:'#FF1E9E' },
+    { title:'Groove Station',  cat:'YouTube Series',     sub:'Family entertainment — music & storytelling',   c1:'#8B00FF', c2:'#FF1E9E' },
+    { title:'Street Sounds',   cat:'Music Visualizer',   sub:'AI-generated reactive visual experience',       c1:'#FFE600', c2:'#FF6B00' },
+  ];
+
+  const grid = document.getElementById('wgGrid');
+  grid.innerHTML = projects.map(p => `
+    <div class="wg-card" style="--c1:${p.c1};--c2:${p.c2}">
+      <div class="wg-card-overlay"></div>
+      <div class="wg-playing">
+        <div class="blink-dot"></div>
+        Now Playing
+      </div>
+      <div class="wg-info">
+        <span class="wg-cat">${p.cat}</span>
+        <h3 class="wg-title">${p.title}</h3>
+        <p class="wg-sub">${p.sub}</p>
+        <span class="wg-cta">View Project →</span>
+      </div>
+    </div>`).join('');
+})();
+
+/* ══════════════ CSS PARTICLES */
+(function(){
+  const wrap = document.getElementById('particles');
+  const COLS = ['#FF1E9E','#00B7FF','#1DC400','#FFE600','#8B00FF','#FF6B00','#00F0FF'];
+  const count = 55;
+  for(let i = 0; i < count; i++){
+    const dot = document.createElement('div');
+    dot.className = 'p-dot';
+    const size  = Math.random() * 8 + 3;
+    const left  = Math.random() * 100;
+    const top   = Math.random() * 100;
+    const dur   = (Math.random() * 8 + 5).toFixed(2);
+    const del   = (Math.random() * 10).toFixed(2);
+    const col   = COLS[Math.floor(Math.random() * COLS.length)];
+    const drift = ((Math.random() - .5) * 60).toFixed(1);
+    dot.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${left}%; top:${top}%;
+      background:${col};
+      animation-duration:${dur}s;
+      animation-delay:-${del}s;
+      opacity:0;
+      filter: blur(${size > 8 ? 1 : 0}px);
+    `;
+    // individul horizontal drift per particle via inline keyframe override
+    dot.style.setProperty('--drift', `${drift}px`);
+    wrap.appendChild(dot);
+  }
+  // inject a shared drift keyframe that uses the CSS variable
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes particleFloat {
+      0%   { transform: translate(0, 0) scale(1); opacity:0; }
+      8%   { opacity: .85; }
+      92%  { opacity: .6; }
+      100% { transform: translate(var(--drift, 0px), -130px) scale(.3); opacity:0; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+/* ══════════════ NAVBAR SCROLL */
+(function(){
+  const nav = document.getElementById('navbar');
+  window.addEventListener('scroll', ()=>{
+    nav.classList.toggle('scrolled', window.scrollY > 50);
+  });
+})();
+</script>
+</body>
+</html>
