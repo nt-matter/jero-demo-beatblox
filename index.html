@@ -21,6 +21,8 @@
       --orange: #FF7A00;
     }
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    /* anchor offset — evita que el header tape el título */
+    [id] { scroll-margin-top: 120px; }
     html { scroll-behavior:smooth; }
     body { background:var(--dark); color:#fff; font-family:'Poppins',sans-serif; overflow-x:hidden; }
     ::-webkit-scrollbar { width:4px; }
@@ -35,9 +37,14 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 52px;
-      transition: background .4s;
+      transition: background .4s, backdrop-filter .4s, box-shadow .4s;
     }
-    nav.scrolled { background: rgba(5,5,5,.97); }
+    nav.scrolled {
+      background: rgba(5,5,5,.78);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: 0 1px 0 rgba(255,255,255,.05), 0 4px 24px rgba(0,0,0,.4);
+    }
 
     .nav-logo-img {
       height: 120px;
@@ -887,7 +894,7 @@
     .proc-step:hover::before { opacity:1; }
     /* bottom color bar — always visible */
     .proc-step::after {
-      content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+      content:''; position:absolute; bottom:0; left:0; right:0; height:6px;
       background: var(--ps-color);
       box-shadow: 0 0 12px var(--ps-color);
       opacity: .55; transition: opacity .35s;
@@ -931,7 +938,7 @@
     }
     .track-item:hover .track-title { color:var(--accent); }
     .track-desc {
-      font-size:.82rem; color:rgba(255,255,255,.38);
+      font-size:.96rem; color:rgba(255,255,255,.45);
       line-height:1.6; max-height:0; overflow:hidden;
       transition:max-height .4s ease, margin .4s ease; margin-top:0;
     }
