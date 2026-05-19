@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BeatBlox Studio</title>
+  <title>BeatBlox Studio | AI Video Production, Animation & Creative Content</title>
+  <meta name="description" content="BeatBlox Studio creates AI-powered videos, animated characters, music-driven stories and creative audiovisual content for brands, creators and family entertainment." />
+  <meta property="og:title" content="BeatBlox Studio | AI Video Production, Animation & Creative Content" />
+  <meta property="og:description" content="BeatBlox Studio creates AI-powered videos, animated characters, music-driven stories and creative audiovisual content for brands, creators and family entertainment." />
+  <meta property="og:type" content="website" />
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
 
@@ -1095,6 +1099,40 @@
     .car-card:hover .car-thumb { opacity:1; }
     .car-card.video-playing .car-thumb { opacity:0; }
 
+    /* ─── WHY BEATBLOX STUDIO ────────────────────────── */
+    .why-section {
+      background: var(--dark); padding: 90px 0;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .why-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 2px;
+      margin-top: 32px;
+    }
+    .why-card {
+      background: #0a0a0a; border: 1px solid rgba(255,255,255,.06);
+      padding: 36px 28px 32px; position: relative; overflow: hidden;
+      transition: background .3s;
+    }
+    .why-card:hover { background: #111; }
+    .why-card::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+      background: var(--wc-color); box-shadow: 0 0 10px var(--wc-color);
+      opacity:.5; transition: opacity .3s;
+    }
+    .why-card:hover::after { opacity:1; }
+    .why-icon {
+      font-size:1.8rem; margin-bottom:16px; display:block; line-height:1;
+      filter: drop-shadow(0 0 8px var(--wc-color));
+    }
+    .why-title {
+      font-family:'Poppins',sans-serif; font-size:.95rem; font-weight:700;
+      color:#fff; margin-bottom:10px;
+    }
+    .why-desc {
+      font-size:.82rem; color:rgba(255,255,255,.42); line-height:1.65;
+    }
+    @media(max-width:900px){ .why-grid { grid-template-columns:repeat(2,1fr); } }
+
     /* ─── COMMUNITY / THE BUZZ ───────────────────────── */
     .community-section { background:#080808; }
     .comm-sub { font-size:.92rem; color:rgba(255,255,255,.32); margin-top:14px; letter-spacing:.4px; font-weight:400; }
@@ -1220,13 +1258,27 @@
     /* ─── FOOTER ──────────────────────────────────────── */
     .foot-strip {
       background:#000; border-top:1px solid rgba(255,255,255,.05);
-      padding:22px 52px;
-      display:flex; align-items:center; justify-content:space-between;
+      padding:28px 56px;
+      display:flex; align-items:center; justify-content:space-between; gap:24px;
+      flex-wrap:wrap;
     }
-    .foot-logo { height:32px; width:auto; opacity:.35; }
+    .foot-logo { height:36px; width:auto; opacity:.4; }
     .foot-note {
-      font-size:.78rem; letter-spacing:2px;
+      font-size:.72rem; letter-spacing:2px;
       text-transform:uppercase; color:rgba(255,255,255,.18);
+    }
+    .foot-socials { display:flex; align-items:center; gap:18px; }
+    .foot-social {
+      display:flex; align-items:center; gap:7px;
+      font-family:'Space Mono',monospace;
+      font-size:.6rem; letter-spacing:2px; text-transform:uppercase;
+      color:rgba(255,255,255,.28); text-decoration:none;
+      transition:color .25s;
+    }
+    .foot-social:hover { color:var(--cyan); }
+    .foot-social-dot {
+      width:5px; height:5px; border-radius:50%;
+      background:currentColor; flex-shrink:0;
     }
     .foot-dot {
       width:6px; height:6px; border-radius:50%;
@@ -1505,6 +1557,58 @@
   </div>
 </section>
 
+<!-- ══════════════════════ WHY BEATBLOX STUDIO -->
+<section class="why-section">
+  <div class="bb-inner">
+    <div class="sec-header" style="padding-left:0;padding-right:0;text-align:left">
+      <span class="sec-label">/ Why Us</span>
+      <h2 class="sec-title">Why <em>BeatBlox Studio</em></h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card" style="--wc-color:var(--pink)">
+        <span class="why-icon" style="color:var(--pink)">⚡</span>
+        <h3 class="why-title">Fast Creative Production</h3>
+        <p class="why-desc">From concept to delivery — fast, flexible and built for today's content pace.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--cyan)">
+        <span class="why-icon" style="color:var(--cyan)">🤖</span>
+        <h3 class="why-title">AI-Enhanced Workflows</h3>
+        <p class="why-desc">We combine creative direction with AI-powered tools for smarter, faster production.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--green)">
+        <span class="why-icon" style="color:var(--green)">✦</span>
+        <h3 class="why-title">Original Characters & Worlds</h3>
+        <p class="why-desc">We build characters, stories and visual universes that are 100% ours — and yours.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--yellow)">
+        <span class="why-icon" style="color:var(--yellow)">♪</span>
+        <h3 class="why-title">Music-Driven Storytelling</h3>
+        <p class="why-desc">Every piece starts with a rhythm — music is at the heart of everything we create.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--purple)">
+        <span class="why-icon" style="color:var(--purple)">📱</span>
+        <h3 class="why-title">Built for Digital Platforms</h3>
+        <p class="why-desc">YouTube, TikTok, Instagram, Shorts, Reels — content made to perform where it lives.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--orange)">
+        <span class="why-icon" style="color:var(--orange)">🎯</span>
+        <h3 class="why-title">Flexible for Any Project</h3>
+        <p class="why-desc">Brands, creators, entertainment projects — we adapt to what you need and how you work.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--cyan)">
+        <span class="why-icon" style="color:var(--cyan)">👨‍👩‍👧</span>
+        <h3 class="why-title">Family-Friendly & Commercial</h3>
+        <p class="why-desc">Content kids love to watch — and parents actually enjoy too. Clean, positive and fun.</p>
+      </div>
+      <div class="why-card" style="--wc-color:var(--pink)">
+        <span class="why-icon" style="color:var(--pink)">🎨</span>
+        <h3 class="why-title">Strong Visual Identity</h3>
+        <p class="why-desc">Bold visuals, a clear design language and creative direction that makes your content stand out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════════ COMMUNITY / THE BUZZ -->
 <section class="community-section" id="community">
   <div class="bb-inner">
@@ -1592,6 +1696,20 @@
 <footer class="foot-strip">
   <img src="imagen/logo.png" alt="BeatBlox" class="foot-logo" />
   <span class="foot-note">© 2025 BeatBlox Studio — All rights reserved</span>
+  <div class="foot-socials">
+    <a href="https://www.youtube.com/channel/UCgWg4iu5KpJBNjA1kAadmeg/" target="_blank" class="foot-social">
+      <span class="foot-social-dot" style="background:var(--pink)"></span>YouTube
+    </a>
+    <a href="https://www.instagram.com/beatbloxstudio" target="_blank" class="foot-social">
+      <span class="foot-social-dot" style="background:var(--cyan)"></span>Instagram
+    </a>
+    <a href="#" class="foot-social">
+      <span class="foot-social-dot" style="background:var(--green)"></span>TikTok
+    </a>
+    <a href="#" class="foot-social">
+      <span class="foot-social-dot" style="background:var(--blue)"></span>Facebook
+    </a>
+  </div>
   <div class="foot-dot"></div>
 </footer>
 
