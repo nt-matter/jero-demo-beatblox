@@ -1033,7 +1033,15 @@
       color:rgba(255,255,255,.28); line-height:1.75; max-width:240px;
       text-align:right; border-right:2px solid rgba(255,255,255,.08); padding-right:20px;
     }
-    .what-tags { display:flex; flex-wrap:wrap; gap:12px; }
+    .what-tags {
+      overflow:hidden; display:flex; flex-direction:column; gap:12px; margin-top:4px;
+      mask-image:linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+      -webkit-mask-image:linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    }
+    .what-tags-row { display:flex; gap:12px; flex-shrink:0; width:max-content; }
+    .what-tags-row-1 { animation:mLeft  34s linear infinite; }
+    .what-tags-row-2 { animation:mRight 40s linear infinite; }
+    .what-section:hover .what-tags-row { animation-play-state:paused; }
     .what-tag {
       font-family:'Poppins',sans-serif;
       font-size:clamp(.88rem,1.3vw,1.08rem); font-weight:600;
@@ -1860,21 +1868,35 @@
   document.querySelectorAll('.stat-num').forEach(el=>obs.observe(el));
 })();
 
-/* ══════════════ WHAT WE MAKE — TAG GRID */
+/* ══════════════ WHAT WE MAKE — TAG MARQUEE */
 (function(){
-  const palette=[
-    {color:'#FF1E9E',rgb:'255,30,158'},{color:'#B7FF00',rgb:'183,255,0'},
-    {color:'#00F0FF',rgb:'0,240,255'},{color:'#FFF000',rgb:'255,240,0'},
-    {color:'#FF1E9E',rgb:'255,30,158'},{color:'#00B7FF',rgb:'0,183,255'},
-    {color:'#B7FF00',rgb:'183,255,0'},{color:'#A020FF',rgb:'160,32,255'},
-    {color:'#00F0FF',rgb:'0,240,255'},{color:'#FF7A00',rgb:'255,122,0'},
-    {color:'#FF1E9E',rgb:'255,30,158'},{color:'#FFF000',rgb:'255,240,0'},
+  const row1=[
+    {t:'Kids music videos',       color:'#FF1E9E',rgb:'255,30,158'},
+    {t:'Animated YouTube series', color:'#B7FF00',rgb:'183,255,0'},
+    {t:'Original characters',     color:'#00F0FF',rgb:'0,240,255'},
+    {t:'Shorts, Reels & TikToks', color:'#FFF000',rgb:'255,240,0'},
+    {t:'Sing-along songs',        color:'#00B7FF',rgb:'0,183,255'},
+    {t:'Family-friendly campaigns',color:'#A020FF',rgb:'160,32,255'},
+    {t:'Brand films with a beat', color:'#FF7A00',rgb:'255,122,0'},
   ];
-  const tags=['Kids music videos','Animated YouTube series','Original characters','Shorts, Reels & TikToks','Sing-along songs','Family-friendly campaigns','Brand films with a beat','Music visualizers','Playful learning videos','Fantasy & cinematic scenes','Character-based franchises','Positive-message storytelling'];
-  document.getElementById('whatTags').innerHTML=tags.map((t,i)=>{
-    const p=palette[i%palette.length];
-    return `<span class="what-tag" style="--wt-color:${p.color};--wt-rgb:${p.rgb}">${t}</span>`;
-  }).join('');
+  const row2=[
+    {t:'Music visualizers',           color:'#00F0FF',rgb:'0,240,255'},
+    {t:'Playful learning videos',     color:'#FF1E9E',rgb:'255,30,158'},
+    {t:'Fantasy & cinematic scenes',  color:'#B7FF00',rgb:'183,255,0'},
+    {t:'Character-based franchises',  color:'#FFF000',rgb:'255,240,0'},
+    {t:'Positive-message storytelling',color:'#00B7FF',rgb:'0,183,255'},
+    {t:'AI-generated characters',     color:'#A020FF',rgb:'160,32,255'},
+    {t:'Educational animations',      color:'#FF7A00',rgb:'255,122,0'},
+  ];
+  function buildRow(items){
+    return items.map(t=>`<span class="what-tag" style="--wt-color:${t.color};--wt-rgb:${t.rgb}">${t.t}</span>`).join('');
+  }
+  const wrap=document.getElementById('whatTags');
+  const r1=document.createElement('div'); r1.className='what-tags-row what-tags-row-1';
+  const r2=document.createElement('div'); r2.className='what-tags-row what-tags-row-2';
+  const h1=buildRow(row1); r1.innerHTML=h1+h1;
+  const h2=buildRow(row2); r2.innerHTML=h2+h2;
+  wrap.appendChild(r1); wrap.appendChild(r2);
 })();
 
 /* ══════════════ MODULE 1 — WORK CAROUSEL */
