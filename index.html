@@ -467,6 +467,7 @@
       border-bottom: 1px solid rgba(255,255,255,.05);
       overflow: hidden;
       cursor: default; user-select: none;
+      padding: 15px 0;
     }
     .marquee-row {
       display: flex; overflow:hidden; padding:13px 0;
@@ -478,8 +479,8 @@
       display:flex; align-items:center; gap:12px;
       flex-shrink:0; will-change:transform;
     }
-    .row-left  .marquee-track { animation: mLeft  28s linear infinite; }
-    .row-right .marquee-track { animation: mRight 34s linear infinite; }
+    .row-left  .marquee-track { animation: mLeft  42s linear infinite; }
+    .row-right .marquee-track { animation: mRight 50s linear infinite; }
     .marquee-section:hover .marquee-track { animation-play-state: paused; }
     @keyframes mLeft  { 0%{transform:translateX(0)}    100%{transform:translateX(-50%)} }
     @keyframes mRight { 0%{transform:translateX(-50%)} 100%{transform:translateX(0)}    }
