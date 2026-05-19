@@ -420,22 +420,22 @@
     .soundwave-wrap {
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      height: 72px;
+      height: 240px;
       display: flex;
       align-items: flex-end;
-      justify-content: center;
-      gap: 3px;
+      gap: 2px;
+      padding: 0 4px;
       z-index: 5;
-      padding-bottom: 12px;
       pointer-events: none;
-      mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+      mask-image: linear-gradient(to top, rgba(0,0,0,.5) 0%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.5) 0%, transparent 100%);
     }
     .sw-bar {
-      width: 3px; border-radius: 2px 2px 0 0;
-      animation: swAnim ease-in-out infinite alternate;
+      flex: 1; border-radius: 2px 2px 0 0;
+      animation: eqBounce ease-in-out infinite alternate;
+      will-change: height;
     }
-    @keyframes swAnim { 0%{transform:scaleY(.1)} 100%{transform:scaleY(1)} }
+    @keyframes eqBounce { 0%{height:var(--min)} 100%{height:var(--max)} }
 
     /* scroll hint */
     .scroll-hint {
@@ -734,11 +734,169 @@
       transition: transform .3s;
     }
     .wg-card:hover .wg-cta-arrow { transform:translateX(4px); }
+    /* video thumb + iframe layer */
+    .wg-video-thumb {
+      position:absolute; inset:0;
+      background-size:cover; background-position:center;
+      opacity:.7; transition: opacity .5s, transform .6s;
+    }
+    .wg-card:hover .wg-video-thumb { opacity:1; transform:scale(1.03); }
+    .wg-card.video-playing .wg-video-thumb { opacity:0; }
+    .wg-video-layer { position:absolute; inset:0; overflow:hidden; }
+    .wg-video-layer iframe {
+      position:absolute; top:50%; left:50%;
+      width:177.78%; height:100%;
+      transform:translate(-50%,-50%);
+      border:none; opacity:0; transition:opacity .5s;
+    }
+    .wg-card.video-playing .wg-video-layer iframe { opacity:1; }
+    .wg-card.video-playing .wg-card-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%);
+    }
 
     @media (max-width:900px) {
       .wg-grid { grid-template-columns: 1fr; }
       .wg-card { height:300px; }
       .sec-header { padding:60px 28px 36px; }
+    }
+
+    /* ─── MEET BEATBLOX ──────────────────────────────── */
+    .meet-section {
+      background: var(--dark2);
+      padding: 80px 56px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .meet-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1.3fr; gap: 72px; align-items: center;
+    }
+    .meet-visual {
+      position: relative; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.09);
+      background: #000;
+    }
+    .meet-visual::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(255,30,158,.06) 0%, rgba(0,240,255,.04) 100%);
+      pointer-events:none;
+    }
+    .meet-thumb-link { display:block; position:relative; text-decoration:none; }
+    .meet-thumb {
+      width:100%; aspect-ratio:16/9;
+      background-size:cover; background-position:center;
+      transition: transform .6s;
+    }
+    .meet-visual:hover .meet-thumb { transform: scale(1.04); }
+    .meet-play-btn {
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.2rem; color:#fff;
+      background:rgba(0,0,0,.35);
+      opacity:0; transition:opacity .3s;
+    }
+    .meet-visual:hover .meet-play-btn { opacity:1; }
+    .meet-project-sub {
+      font-family:'Space Mono',monospace;
+      font-size:.72rem; letter-spacing:1.5px;
+      color:rgba(255,255,255,.38); margin-bottom:20px; margin-top:-10px;
+    }
+    .meet-content .sec-label { margin-bottom: 14px; display:block; }
+    .meet-title {
+      font-family: 'Bungee', sans-serif;
+      font-size: clamp(2.2rem, 3.8vw, 4.2rem);
+      text-transform: uppercase; color: #fff; line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .meet-title em { font-style:normal; color: var(--green); text-shadow: 0 0 24px rgba(183,255,0,.35); }
+    .meet-body {
+      font-size: .92rem; color: rgba(255,255,255,.5); line-height: 1.75; margin-bottom: 14px;
+    }
+    .meet-cta {
+      display: inline-flex; align-items: center; gap: 10px;
+      border: 1.5px solid var(--yellow); color: var(--yellow);
+      padding: 14px 28px; font-family: 'Space Mono', monospace;
+      font-size: .68rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: none; margin: 20px 0 30px; transition: background .3s, box-shadow .3s, color .3s;
+    }
+    .meet-cta:hover { background: var(--yellow); color: #000; box-shadow: 0 0 28px rgba(255,240,0,.35); }
+    .meet-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .meet-tag {
+      border: 1.5px solid var(--mt-color); color: var(--mt-color);
+      padding: 5px 14px; font-family: 'Space Mono', monospace;
+      font-size: .6rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      background: rgba(var(--mt-rgb), .06); transition: background .25s;
+    }
+    .meet-tag:hover { background: rgba(var(--mt-rgb), .15); }
+    @media(max-width:860px){ .meet-inner{ grid-template-columns:1fr; gap:40px; } .meet-section{ padding:60px 28px; } }
+
+    /* ─── PROCESS ─────────────────────────────────────── */
+    .process-section {
+      background: var(--dark3);
+      padding-bottom: 90px;
+      border-top: 1px solid rgba(255,255,255,.05);
+    }
+    .proc-inner {
+      max-width: 1360px; margin: 0 auto; padding: 0 56px;
+    }
+    .proc-headline {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2.4rem, 5vw, 5.5rem);
+      font-weight: 800; color: #fff; line-height: 1.05;
+    }
+    .proc-headline em { font-style: normal; color: var(--pink); text-shadow: 0 0 30px rgba(255,30,158,.4); }
+    .proc-steps {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 2px;
+      margin-top: 32px;
+    }
+    .proc-step {
+      padding: 44px 32px 36px;
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,.06);
+      position: relative; overflow: hidden;
+      transition: background .3s;
+    }
+    .proc-step:hover { background: #111; }
+    .proc-num {
+      font-family: 'Bungee', sans-serif;
+      font-size: 2.8rem; color: var(--green); line-height: 1;
+      margin-bottom: 32px;
+      text-shadow: 0 0 20px rgba(183,255,0,.3);
+    }
+    .proc-icon {
+      position: absolute; top: 40px; right: 28px;
+      font-size: 2.6rem; opacity: .85; line-height: 1;
+      filter: drop-shadow(0 0 10px currentColor);
+      transition: transform .35s, filter .35s;
+    }
+    .proc-step:hover .proc-icon { transform: scale(1.15); filter: drop-shadow(0 0 18px currentColor); }
+    .proc-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.15rem; font-weight: 700; color: #fff;
+      margin-bottom: 12px;
+    }
+    .proc-desc {
+      font-size: .85rem; color: rgba(255,255,255,.42); line-height: 1.7;
+    }
+    /* top accent line on hover */
+    .proc-step::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background: var(--ps-color, transparent);
+      box-shadow: 0 0 14px var(--ps-color, transparent);
+      opacity: 0; transition: opacity .35s;
+    }
+    .proc-step:hover::before { opacity:1; }
+    /* bottom color bar — always visible */
+    .proc-step::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+      background: var(--ps-color);
+      box-shadow: 0 0 12px var(--ps-color);
+      opacity: .55; transition: opacity .35s;
+    }
+    .proc-step:hover::after { opacity:1; }
+    .proc-step:hover .proc-num { text-shadow: 0 0 30px rgba(183,255,0,.6); }
+    @media(max-width:900px){
+      .proc-steps { grid-template-columns: repeat(2,1fr); }
+      .proc-inner { padding: 0 28px; }
     }
 
     /* ─── SERVICES — TRACK LISTING ───────────────────── */
@@ -783,11 +941,22 @@
     .track-item.open .track-arrow { transform:rotate(90deg); color:var(--accent); }
 
     /* ─── STATS ───────────────────────────────────────── */
+    /* shared inner box — 1360px */
+    .bb-inner {
+      max-width: 1360px; margin: 0 auto; padding: 0 56px;
+    }
+    @media(max-width:900px){ .bb-inner { padding: 0 28px; } }
+
     .stats-section {
-      background:#000; display:grid; grid-template-columns:repeat(4,1fr);
+      background:#000;
       border-top:1px solid rgba(255,255,255,.05);
       border-bottom:1px solid rgba(255,255,255,.05);
     }
+    .stats-inner {
+      max-width:1360px; margin:0 auto; padding:0 56px;
+      display:grid; grid-template-columns:repeat(4,1fr);
+    }
+    @media(max-width:900px){ .stats-inner { padding:0 28px; } }
     .stat-item {
       text-align:center; padding:56px 24px;
       border-right:1px solid rgba(255,255,255,.05);
@@ -815,7 +984,7 @@
 
     /* ─── WHAT WE MAKE — TAG GRID ────────────────────── */
     .what-section {
-      background: var(--dark2); padding:100px 56px 96px;
+      background: var(--dark2); padding:100px 0 96px;
       position:relative; overflow:hidden;
       border-top:1px solid rgba(255,255,255,.05);
     }
@@ -921,7 +1090,7 @@
     /* ─── COMMUNITY / THE BUZZ ───────────────────────── */
     .community-section { background:#080808; }
     .comm-sub { font-size:.92rem; color:rgba(255,255,255,.32); margin-top:14px; letter-spacing:.4px; font-weight:400; }
-    .platform-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; padding:0 0 2px; margin-bottom:64px; }
+    .platform-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; padding:0 56px 2px; margin-bottom:64px; max-width:1360px; margin-left:auto; margin-right:auto; }
     .platform-card { background:var(--dark3); padding:36px 32px 32px; position:relative; overflow:hidden; transition:background .3s; border-top:2px solid var(--p-color); }
     .platform-card:hover { background:#111; }
     .platform-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--p-color); box-shadow:0 0 16px var(--p-color); }
@@ -931,7 +1100,7 @@
     .p-name { font-family:'Space Mono',monospace; font-size:.65rem; letter-spacing:4px; text-transform:uppercase; color:var(--p-color); margin-bottom:8px; display:block; }
     .p-metric { font-family:'Bungee',sans-serif; font-size:clamp(1.4rem,2.5vw,2.2rem); color:#fff; line-height:1; display:block; margin-bottom:12px; }
     .p-desc { font-size:.78rem; color:rgba(255,255,255,.35); line-height:1.65; font-weight:400; }
-    .comment-feed { display:grid; grid-template-columns:repeat(3,1fr); gap:0 12px; height:560px; overflow:hidden; padding:0 56px 72px; mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); }
+    .comment-feed { display:grid; grid-template-columns:repeat(3,1fr); gap:0 12px; height:560px; overflow:hidden; padding:0 56px 72px; max-width:1360px; margin:0 auto; mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); }
     .cf-col { display:flex; flex-direction:column; gap:10px; will-change:transform; }
     .cf-col-0 { animation:cfUp 28s linear infinite; }
     .cf-col-1 { animation:cfUp 36s linear infinite; animation-delay:-10s; }
@@ -1191,6 +1360,33 @@
   </div>
 </section>
 
+<!-- ══════════════════════ MEET BEATBLOX -->
+<section class="meet-section">
+  <div class="meet-inner">
+    <div class="meet-visual">
+      <a href="https://www.youtube.com/watch?v=ILU3mWBxMBY" target="_blank" class="meet-thumb-link">
+        <div class="meet-thumb" style="background-image:url(https://img.youtube.com/vi/ILU3mWBxMBY/maxresdefault.jpg)"></div>
+        <div class="meet-play-btn">▶</div>
+      </a>
+    </div>
+    <div class="meet-content">
+      <span class="sec-label">/ Original Project</span>
+      <h2 class="meet-title"><em>We Legends</em></h2>
+      <p class="meet-project-sub">Una aventura musical inspirada en la Copa del Mundo 2026</p>
+      <p class="meet-body">BeatBlox is our flagship YouTube project — a musical universe of colorful characters, catchy songs and positive stories made for kids and families.</p>
+      <p class="meet-body">We blend hip hop, rock, pop and animation into sing-along songs, animated shorts and character-driven adventures that families actually enjoy together.</p>
+      <a href="https://www.youtube.com/watch?v=ILU3mWBxMBY" target="_blank" class="meet-cta">▶ &nbsp;Watch on YouTube</a>
+      <div class="meet-tags">
+        <span class="meet-tag" style="--mt-color:var(--pink);--mt-rgb:255,30,158">Musical</span>
+        <span class="meet-tag" style="--mt-color:var(--cyan);--mt-rgb:0,240,255">Colorful</span>
+        <span class="meet-tag" style="--mt-color:var(--green);--mt-rgb:183,255,0">Playful</span>
+        <span class="meet-tag" style="--mt-color:var(--yellow);--mt-rgb:255,240,0">Family-Friendly</span>
+        <span class="meet-tag" style="--mt-color:var(--purple);--mt-rgb:160,32,255">Positive</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════════ SERVICES — TRACK LISTING -->
 <section class="services-section" id="services">
   <div class="sec-header">
@@ -1202,34 +1398,38 @@
 
 <!-- ══════════════════════ STATS -->
 <div class="stats-section">
-  <div class="stat-item" style="--accent:var(--pink)">
-    <span class="stat-num" data-target="500" data-suffix="K+">0</span>
-    <span class="stat-label">Channel Views</span>
-  </div>
-  <div class="stat-item" style="--accent:var(--cyan)">
-    <span class="stat-num" data-target="80" data-suffix="+">0</span>
-    <span class="stat-label">Videos Made</span>
-  </div>
-  <div class="stat-item" style="--accent:var(--green)">
-    <span class="stat-num" data-target="40" data-suffix="+">0</span>
-    <span class="stat-label">Characters</span>
-  </div>
-  <div class="stat-item" style="--accent:var(--yellow)">
-    <span class="stat-num" data-target="6" data-suffix="">0</span>
-    <span class="stat-label">Platforms</span>
+  <div class="stats-inner">
+    <div class="stat-item" style="--accent:var(--pink)">
+      <span class="stat-num" data-target="500" data-suffix="K+">0</span>
+      <span class="stat-label">Channel Views</span>
+    </div>
+    <div class="stat-item" style="--accent:var(--cyan)">
+      <span class="stat-num" data-target="80" data-suffix="+">0</span>
+      <span class="stat-label">Videos Made</span>
+    </div>
+    <div class="stat-item" style="--accent:var(--green)">
+      <span class="stat-num" data-target="40" data-suffix="+">0</span>
+      <span class="stat-label">Characters</span>
+    </div>
+    <div class="stat-item" style="--accent:var(--yellow)">
+      <span class="stat-num" data-target="6" data-suffix="">0</span>
+      <span class="stat-label">Platforms</span>
+    </div>
   </div>
 </div>
 
 <!-- ══════════════════════ WHAT WE MAKE — TAG GRID -->
-<section class="what-section" id="process">
+<section class="what-section">
   <div class="what-grid-bg"></div>
   <div class="what-blob-a"></div>
   <div class="what-blob-b"></div>
-  <div class="what-header">
-    <h2 class="what-title">Stuff we love<br>to <em>make</em><span class="dot">.</span></h2>
-    <p class="what-sub">A taste of what we build across kids entertainment, family content and branded fun.</p>
+  <div class="bb-inner">
+    <div class="what-header">
+      <h2 class="what-title">Stuff we love<br>to <em>make</em><span class="dot">.</span></h2>
+      <p class="what-sub">A taste of what we build across kids entertainment, family content and branded fun.</p>
+    </div>
+    <div class="what-tags" id="whatTags"></div>
   </div>
-  <div class="what-tags" id="whatTags"></div>
 </section>
 
 <!-- ══════════════════════ MODULE 1 — WORK CAROUSEL -->
@@ -1256,12 +1456,55 @@
   <div class="wg-grid" id="wgGrid"></div>
 </section>
 
+<!-- ══════════════════════ PROCESS — HOW WE WORK -->
+<section class="process-section" id="process">
+  <div class="sec-header">
+    <span class="sec-label">/ How We Work</span>
+    <h2 class="proc-headline">From spark to <em>drop.</em></h2>
+  </div>
+  <div class="proc-inner">
+    <div class="proc-steps">
+
+      <div class="proc-step" style="--ps-color:var(--pink)">
+        <div class="proc-num">01</div>
+        <div class="proc-icon" style="color:var(--pink)">◎</div>
+        <h3 class="proc-name">The Idea</h3>
+        <p class="proc-desc">We start with the spark — the message, the mood and the hook.</p>
+      </div>
+
+      <div class="proc-step" style="--ps-color:var(--cyan)">
+        <div class="proc-num">02</div>
+        <div class="proc-icon" style="color:var(--cyan)">♫</div>
+        <h3 class="proc-name">The Sound</h3>
+        <p class="proc-desc">We shape the rhythm, energy and musical vibe that drives the whole piece.</p>
+      </div>
+
+      <div class="proc-step" style="--ps-color:var(--blue)">
+        <div class="proc-num">03</div>
+        <div class="proc-icon" style="color:var(--blue)">✦</div>
+        <h3 class="proc-name">The World</h3>
+        <p class="proc-desc">We build the characters, scenes, style and visual universe.</p>
+      </div>
+
+      <div class="proc-step" style="--ps-color:var(--purple)">
+        <div class="proc-num">04</div>
+        <div class="proc-icon" style="color:var(--purple)">▶</div>
+        <h3 class="proc-name">The Video</h3>
+        <p class="proc-desc">We bring it all together with animation, editing, sound and AI-powered production — ready for YouTube, Shorts, TikTok and Reels.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- ══════════════════════ COMMUNITY / THE BUZZ -->
 <section class="community-section" id="community">
-  <div class="sec-header">
-    <span class="sec-label">/ The Buzz</span>
-    <h2 class="sec-title">People Watch. People <em>Feel It.</em></h2>
-    <p class="comm-sub">Real reactions from real audiences across every platform.</p>
+  <div class="bb-inner">
+    <div class="sec-header" style="padding-left:0;padding-right:0">
+      <span class="sec-label">/ The Buzz</span>
+      <h2 class="sec-title">People Watch. People <em>Feel It.</em></h2>
+      <p class="comm-sub">Real reactions from real audiences across every platform.</p>
+    </div>
   </div>
   <div class="platform-grid" id="platformGrid"></div>
   <div class="comment-feed">
@@ -1401,13 +1644,17 @@
 /* ══════════════ SOUNDWAVE */
 (function(){
   const wrap=document.getElementById('soundwave');
-  const COLS=['#FF1E9E','#A020FF','#00F0FF','#7FFF00','#00B7FF'];
-  for(let i=0;i<85;i++){
+  const COLS=['#FF1E9E','#00F0FF','#B7FF00','#A020FF','#00B7FF','#FF7A00','#FFF000'];
+  for(let i=0;i<90;i++){
     const b=document.createElement('div');
     b.className='sw-bar';
-    const h=Math.random()*48+5, dur=(Math.random()*1.3+.45).toFixed(2);
-    const del=(Math.random()*1.8).toFixed(2), col=COLS[Math.floor(Math.random()*COLS.length)];
-    b.style.cssText=`height:${h}px;background:${col};opacity:${(Math.random()*.32+.18).toFixed(2)};animation-duration:${dur}s;animation-delay:-${del}s;box-shadow:0 0 5px ${col}44;`;
+    const min=(Math.random()*12+3).toFixed(0);
+    const max=(Math.random()*160+30).toFixed(0);
+    const dur=(Math.random()*.7+.2).toFixed(2);
+    const del=(Math.random()*2).toFixed(2);
+    const col=COLS[Math.floor(Math.random()*COLS.length)];
+    const opa=(Math.random()*.35+.1).toFixed(2);
+    b.style.cssText=`--min:${min}px;--max:${max}px;animation-duration:${dur}s;animation-delay:-${del}s;background:${col};opacity:${opa};`;
     wrap.appendChild(b);
   }
 })();
@@ -1550,12 +1797,12 @@
 /* ══════════════ MODULE 2 — HOVER VIDEO GRID */
 (function(){
   const projects=[
-    {title:'Rhythm World',    cat:'AI Animation',        sub:'Animated music series for kids & families',   c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E',videoId:'LJuGD82CYmU'},
-    {title:'Beat Drop Vol.1', cat:'Music Video',         sub:'AI-powered audiovisual storytelling',          c1:'#00F0FF',c2:'#00B7FF',glow:'#00F0FF',videoId:'ILU3mWBxMBY'},
-    {title:'Neon Pack Vol.1', cat:'Original Characters', sub:'Character design, animation & world-building', c1:'#B7FF00',c2:'#00F0FF',glow:'#B7FF00'},
+    {title:'Chicken Banana Disco',     cat:'AI Animation', sub:'Funny Animated Kids Song by BeatBlox',                              c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E',videoId:'LJuGD82CYmU'},
+    {title:'We Legends',               cat:'Music Video',  sub:'Una aventura musical inspirada en la Copa del Mundo 2026',           c1:'#00F0FF',c2:'#00B7FF',glow:'#00F0FF',videoId:'ILU3mWBxMBY'},
+    {title:'Figuritas del Mundial 2026',cat:'Music Video', sub:'Cuando el álbum cobra vida ⚽✨ · BeatBlox',                          c1:'#B7FF00',c2:'#FFF000',glow:'#B7FF00',videoId:'CIjm-n4Phtc'},
+    {title:'Neon Pack Vol.1', cat:'Original Characters', sub:'Character design, animation & world-building', c1:'#A020FF',c2:'#00F0FF',glow:'#A020FF'},
     {title:'Color Splash',    cat:'Brand Campaign',      sub:'Creative campaign built for social & digital', c1:'#FF7A00',c2:'#FF1E9E',glow:'#FF7A00'},
-    {title:'Groove Station',  cat:'YouTube Series',      sub:'Family entertainment — music & storytelling',  c1:'#A020FF',c2:'#FF1E9E',glow:'#A020FF'},
-    {title:'Street Sounds',   cat:'Music Visualizer',    sub:'AI-generated reactive visual experience',      c1:'#FFF000',c2:'#FF7A00',glow:'#FFF000'},
+    {title:'Groove Station',  cat:'YouTube Series',      sub:'Family entertainment — music & storytelling',  c1:'#FFF000',c2:'#FF7A00',glow:'#FFF000'},
   ];
   const grid=document.getElementById('wgGrid');
   grid.innerHTML=projects.map(p=>{
