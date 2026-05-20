@@ -1244,7 +1244,13 @@
       text-align:right; border-right:2px solid rgba(255,255,255,.08); padding-right:20px;
     }
     .what-tags {
-      overflow:hidden; display:flex; flex-direction:column; gap:12px; margin-top:4px;
+      /* clip solo en x → el marquee se recorta pero el hover vertical no se corta */
+      overflow-x: clip;
+      overflow-y: visible;
+      display:flex; flex-direction:column; gap:12px;
+      margin-top: 4px;
+      padding-top: 10px;   /* espacio para el lift del hover en la primera fila */
+      margin-top: -6px;    /* compensar el padding extra */
       mask-image:linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
       -webkit-mask-image:linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
     }
