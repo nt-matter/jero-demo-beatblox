@@ -8,7 +8,7 @@
   <meta property="og:title" content="BeatBlox Studio | AI Video Production, Animation & Creative Content" />
   <meta property="og:description" content="BeatBlox Studio creates AI-powered videos, animated characters, music-driven stories and creative audiovisual content for brands, creators and family entertainment." />
   <meta property="og:type" content="website" />
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
 
     /* ─── TOKENS ──────────────────────────────────────── */
@@ -41,12 +41,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 52px;
-      /* hidden initially — slides in as the page scrolls past the hero */
-      transform: translateY(-130%);
-      transition: transform .55s cubic-bezier(.22,.61,.36,1),
-                  background .4s, backdrop-filter .4s, box-shadow .4s;
+      transition: background .4s, backdrop-filter .4s, box-shadow .4s;
     }
-    nav.nav-revealed { transform: translateY(0); }
     nav.scrolled {
       background: rgba(5,5,5,.78);
       backdrop-filter: blur(18px) saturate(160%);
@@ -106,215 +102,13 @@
       box-shadow: 0 0 28px rgba(255,30,158,.6);
     }
 
-    /* ─── HERO (knockout / cinematic reveal variant) ──── */
-    /* tall section gives ScrollTrigger scroll distance to scrub */
+    /* ─── HERO ────────────────────────────────────────── */
     .hero {
       position: relative;
-      height: 220vh;
-      background: #000;
-    }
-    /* the pinned, viewport-filling stage */
-    .hero-pin {
-      position: relative;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-    }
-    .hero-video-bg { z-index: 1; }
-
-    /* knockout overlay — a plain div wrapper so GSAP scales it reliably
-       about its centre (avoids SVG transform-origin quirks) */
-    .hero-knockout {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      will-change: transform, opacity;
-    }
-    .hero-knockout-svg {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    #ko-text {
-      font-family: 'Anton', 'Bungee', sans-serif;
-      font-weight: 400;
-      /* responsive — word spans ~87% of the viewport width */
-      font-size: clamp(4rem, 27vw, 50rem);
-      letter-spacing: clamp(0px, .2vw, 4px);
-      /* stroke fattens the knockout → a heavier wordmark */
-      stroke: #000;
-      stroke-width: clamp(1px, .5vw, 7px);
-    }
-
-    /* dotted texture — subtle (≤.2 opacity), slowly drifting */
-    .hero-dots {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      pointer-events: none;
-      background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1.7px);
-      background-size: 24px 24px;
-      opacity: .18;
-      animation: dotDrift 19s linear infinite;
-    }
-    @keyframes dotDrift {
-      from { background-position: 0 0; }
-      to   { background-position: 48px 48px; }
-    }
-
-    /* "STORIES" — stacked tight under "POSITIVE".
-       wrapper handles placement; the span carries no transform so GSAP
-       can scale it cleanly about its own centre */
-    .hero-stories-wrap {
-      position: absolute;
-      left: 0; right: 0;
-      top: 50%;
-      z-index: 4;
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
-      transform: translateY(calc(-50% + clamp(60px, 9vw, 150px)));
-      pointer-events: none;
-    }
-    .hero-stories {
-      display: inline-block;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800;
-      font-size: clamp(1.5rem, 4.6vw, 3.1rem);
-      letter-spacing: clamp(3px, 1.1vw, 13px);
-      text-transform: uppercase;
-      color: #fff;
-      text-shadow: 0 2px 30px rgba(0,0,0,.7);
-      will-change: transform, opacity;
-    }
-
-    /* brand logo on the initial screen */
-    .hero-logo {
-      position: absolute;
-      top: clamp(20px, 4.4vh, 50px);
-      left: 50%;
-      transform: translateX(-50%);
-      height: clamp(60px, 11vh, 104px);
-      width: auto;
-      z-index: 5;
-      filter: drop-shadow(0 0 14px rgba(0,240,255,.4));
-      pointer-events: none;
-    }
-
-    /* abstract video-player cues — decorative only, never read as controls */
-
-    /* viewfinder corner brackets */
-    .hero-frame {
-      position: absolute;
-      inset: clamp(16px, 2.4vw, 36px);
-      z-index: 6;
-      pointer-events: none;
-    }
-    .hf-corner {
-      position: absolute;
-      width: clamp(22px, 2.6vw, 40px);
-      height: clamp(22px, 2.6vw, 40px);
-      border: 2px solid rgba(255,255,255,.5);
-    }
-    .hf-corner.tl { top:0;    left:0;  border-right:0; border-bottom:0; }
-    .hf-corner.tr { top:0;    right:0; border-left:0;  border-bottom:0; }
-    .hf-corner.bl { bottom:0; left:0;  border-right:0; border-top:0; }
-    .hf-corner.br { bottom:0; right:0; border-left:0;  border-top:0; }
-
-    /* abstract timeline — a tick ruler, no fill, no knob, edges faded out */
-    .hero-ticks {
-      position: absolute;
-      left: 50%;
-      bottom: clamp(30px, 5.4vh, 60px);
-      transform: translateX(-50%);
-      width: min(700px, 84vw);
-      height: 26px;
-      z-index: 6;
-      pointer-events: none;
-      border-bottom: 1px solid rgba(255,255,255,.28);
-      /* minor + major ticks rising from the baseline */
-      background-image:
-        repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 1px, transparent 1px 12px),
-        repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 1.5px, transparent 1.5px 72px);
-      background-repeat: repeat-x, repeat-x;
-      background-size: 12px 8px, 72px 17px;
-      background-position: bottom left, bottom left;
-      -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
-              mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
-    }
-    /* the playhead — a thin scanning accent line, not a draggable handle */
-    .hero-ticks::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 12%;
-      width: 2px;
-      height: 26px;
-      background: var(--green);
-      box-shadow: 0 0 10px rgba(183,255,0,.9);
-      animation: tickScan 13s ease-in-out infinite alternate;
-    }
-    @keyframes tickScan { from { left: 10%; } to { left: 90%; } }
-
-    /* sound toggle — small round button, bottom-right */
-    .hero-sound {
-      position: absolute;
-      right: clamp(24px, 4vw, 60px);
-      bottom: clamp(24px, 4vw, 60px);
-      z-index: 7;
-      width: 44px;
-      height: 44px;
-      display: grid;
-      place-items: center;
-      padding: 0;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.3);
-      background: rgba(10,10,10,.5);
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      cursor: pointer;
-      pointer-events: auto;
-      transition: background .25s, border-color .25s, transform .25s;
-    }
-    .hero-sound:hover { transform: scale(1.08); }
-    .hero-sound:focus-visible {
-      outline: 2px solid var(--green);
-      outline-offset: 3px;
-    }
-    .hero-sound svg { width: 21px; height: 21px; display: block; }
-    .hero-sound .hs-spk    { fill: #fff; }
-    .hero-sound .hs-waves  { stroke: #fff; }
-    .hero-sound .hs-slash  { stroke: #fff; }
-    /* muted state → show the slash, hide the sound waves */
-    .hero-sound .hs-slash  { display: none; }
-    .hero-sound.muted .hs-waves { display: none; }
-    .hero-sound.muted .hs-slash { display: block; }
-    /* sound-on state → green accent */
-    .hero-sound:not(.muted) {
-      border-color: var(--green);
-      background: rgba(183,255,0,.16);
-    }
-    .hero-sound:not(.muted) .hs-spk   { fill: var(--green); }
-    .hero-sound:not(.muted) .hs-waves { stroke: var(--green); }
-
-    /* visually-hidden accessible heading */
-    .hero-sr-title {
-      position: absolute;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px;
+      align-items: center;
       overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    /* reduced motion — show the clean video + nav immediately, no scrub */
-    @media (prefers-reduced-motion: reduce) {
-      .hero { height: 100vh; }
-      .hero-knockout, .hero-stories, .hero-dots,
-      .hero-logo, .hero-frame, .hero-ticks { opacity: 0; }
-      .hero-ticks::after, .hero-dots { animation: none; }
-      nav { transform: translateY(0); transition: none; }
     }
 
     /* ── youtube video background ── */
@@ -1564,67 +1358,92 @@
 </nav>
 
 <!-- ══════════════════════ HERO -->
-<section class="hero" id="hero">
-  <div class="hero-pin">
+<section class="hero">
 
-    <!-- VIDEO BACKGROUND — built by the YouTube IFrame API (see hero script).
-         Looping is done via the API (no playlist= param) so YouTube shows
-         no prev/next chrome. -->
-    <div class="hero-video-bg">
-      <div id="hero-yt"></div>
-    </div>
-
-    <!-- dotted texture overlay -->
-    <div class="hero-dots" aria-hidden="true"></div>
-
-    <!-- knockout overlay: near-black tint punched out by "POSITIVE".
-         No viewBox — user units == CSS px, so #ko-text can size with vw. -->
-    <div class="hero-knockout" aria-hidden="true">
-      <svg class="hero-knockout-svg" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <mask id="positiveMask">
-            <rect width="100%" height="100%" fill="#fff" />
-            <text id="ko-text" x="50%" y="50%" text-anchor="middle"
-                  dominant-baseline="central" fill="#000">POSITIVE</text>
-          </mask>
-        </defs>
-        <rect id="ko-tint" width="100%" height="100%"
-              fill="#000000" opacity="0.9" mask="url(#positiveMask)" />
-      </svg>
-    </div>
-
-    <!-- brand logo (initial screen) -->
-    <img src="imagen/logo.png" alt="BeatBlox" class="hero-logo" />
-
-    <!-- "STORIES" — stacked under "POSITIVE" -->
-    <div class="hero-stories-wrap" aria-hidden="true">
-      <span class="hero-stories">Stories</span>
-    </div>
-
-    <!-- abstract video-player cues — decorative only -->
-    <div class="hero-frame" aria-hidden="true">
-      <i class="hf-corner tl"></i><i class="hf-corner tr"></i>
-      <i class="hf-corner bl"></i><i class="hf-corner br"></i>
-    </div>
-    <div class="hero-ticks" aria-hidden="true"></div>
-
-    <!-- sound toggle (bottom-right) -->
-    <button class="hero-sound muted" type="button" aria-label="Unmute video">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path class="hs-spk" d="M4 9v6h4l5 4V5L8 9H4z" />
-        <g class="hs-waves" fill="none" stroke-width="2" stroke-linecap="round">
-          <path d="M16.5 8.6a4.6 4.6 0 0 1 0 6.8" />
-          <path d="M19.4 5.8a8.3 8.3 0 0 1 0 12.4" />
-        </g>
-        <line class="hs-slash" x1="3.4" y1="20.6" x2="20.6" y2="3.4"
-              stroke-width="2" stroke-linecap="round" />
-      </svg>
-    </button>
-
-    <!-- accessible heading (visually hidden) -->
-    <h1 class="hero-sr-title">Positive Stories — BeatBlox Studio</h1>
-
+  <!-- VIDEO BACKGROUND — YouTube, correr desde http://localhost:8000 -->
+  <div class="hero-video-bg">
+    <iframe
+      src="https://www.youtube-nocookie.com/embed/ILU3mWBxMBY?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playlist=ILU3mWBxMBY&playsinline=1&disablekb=1&fs=0&iv_load_policy=3"
+      allow="autoplay; encrypted-media"
+      title="BeatBlox background"
+      aria-hidden="true"
+      tabindex="-1"
+    ></iframe>
   </div>
+
+  <div class="hero-video-black"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-tint"></div>
+  <div class="hero-grid"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- corner accents -->
+  <div class="cacc cacc-tl"></div>
+  <div class="cacc cacc-tr"></div>
+  <div class="cacc cacc-bl"></div>
+  <div class="cacc cacc-br"></div>
+
+  <!-- TWO-COLUMN -->
+  <div class="hero-inner">
+
+    <!-- LEFT: logo -->
+    <div class="hero-left">
+      <div class="logo-wrap">
+        <div class="logo-glow"></div>
+        <img src="imagen/logo.png" alt="BeatBlox" class="logo-img" />
+      </div>
+      <p class="hero-studio">Studio</p>
+    </div>
+
+    <!-- RIGHT: text -->
+    <div class="hero-right">
+
+      <h1 class="hero-tagline">
+        <span class="glitch-line t-pink"  data-text="Cool songs.">Cool songs.</span>
+        <span class="glitch-line t-green" data-text="Wild characters.">Wild characters.</span>
+        <span class="glitch-line t-cyan"  data-text="Positive stories.">Positive stories.</span>
+      </h1>
+
+      <div class="text-divider"></div>
+
+      <p class="hero-body">
+        BeatBlox Studio makes music-driven animated videos, colorful characters
+        and AI-powered visual stories — for kids, families, creators and brands.
+      </p>
+
+      <p class="hero-body-2">
+        Family-friendly videos kids love, and parents can actually enjoy too.
+        We mix hip hop, rock, pop, animation and playful storytelling into content
+        built for YouTube, TikTok, Shorts, Reels and beyond.
+      </p>
+
+      <div class="platforms">
+        <span class="pill">YouTube</span>
+        <span class="pill">TikTok</span>
+        <span class="pill">Instagram</span>
+        <span class="pill">Shorts</span>
+        <span class="pill">Reels</span>
+        <span class="pill">Facebook</span>
+      </div>
+
+      <div class="hero-ctas">
+        <a href="#" class="btn-primary">Start a Project</a>
+        <a href="https://www.youtube.com/channel/UCgWg4iu5KpJBNjA1kAadmeg/"
+           target="_blank" class="btn-secondary">▶&nbsp; Watch on YouTube</a>
+      </div>
+
+    </div>
+  </div><!-- /hero-inner -->
+
+  <!-- soundwave -->
+  <div class="soundwave-wrap" id="soundwave"></div>
+
+  <!-- scroll hint -->
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+
 </section>
 
 <!-- ══════════════════════ MARQUEE -->
@@ -1931,122 +1750,74 @@
 </footer>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-/* ══════════════ HERO BACKGROUND VIDEO (YouTube IFrame API) */
-var heroPlayer = null;
+/* ══════════════ PARTICLES */
 (function(){
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-})();
-function onYouTubeIframeAPIReady(){
-  heroPlayer = new YT.Player('hero-yt', {
-    videoId: 'ILU3mWBxMBY',
-    playerVars: {
-      autoplay: 1, mute: 1, controls: 0, playsinline: 1,
-      /* loop=1 + playlist (same id) is YouTube's official way to
-         loop a single video reliably */
-      loop: 1, playlist: 'ILU3mWBxMBY',
-      modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3
-    },
-    events: {
-      onReady: function(e){
-        e.target.mute();
-        e.target.playVideo();
-        const f = e.target.getIframe();
-        f.setAttribute('aria-hidden', 'true');
-        f.setAttribute('tabindex', '-1');
-        f.setAttribute('title', 'BeatBlox background');
-      },
-      onStateChange: function(e){
-        // belt-and-suspenders loop fallback
-        if (e.data === YT.PlayerState.ENDED){
-          e.target.seekTo(0);
-          e.target.playVideo();
-        }
-      }
-    }
-  });
-}
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, mouse = {x:-9999, y:-9999};
+  const COLS = ['#FF1E9E','#00F0FF','#A020FF','#00B7FF','#7FFF00'];
+  const pts = [];
 
-/* ══════════════ HERO SOUND TOGGLE */
-(function(){
-  const btn = document.querySelector('.hero-sound');
-  if (!btn) return;
-  btn.addEventListener('click', function(){
-    if (!heroPlayer || typeof heroPlayer.isMuted !== 'function') return;
-    if (heroPlayer.isMuted()){
-      heroPlayer.unMute();
-      heroPlayer.setVolume(100);
-      btn.classList.remove('muted');
-      btn.setAttribute('aria-label', 'Mute video');
-    } else {
-      heroPlayer.mute();
-      btn.classList.add('muted');
-      btn.setAttribute('aria-label', 'Unmute video');
+  function resize(){
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  class P {
+    constructor(){ this.init(true); }
+    init(rnd){
+      this.x  = Math.random()*W;
+      this.y  = rnd ? Math.random()*H : H+8;
+      this.vx = (Math.random()-.5)*.5;
+      this.vy = -(Math.random()*.55+.15);
+      this.r  = Math.random()*1.8+.4;
+      this.col = COLS[Math.floor(Math.random()*COLS.length)];
+      this.life=0; this.maxLife=Math.random()*260+180;
     }
+    step(){
+      const dx=this.x-mouse.x, dy=this.y-mouse.y, d=Math.hypot(dx,dy);
+      if(d<90){ const f=(90-d)/90; this.vx+=(dx/d)*f*.3; this.vy+=(dy/d)*f*.3; }
+      this.vx*=.97; this.vy*=.97; this.x+=this.vx; this.y+=this.vy; this.life++;
+      const p=this.life/this.maxLife;
+      this.a = p<.1?p*10*.5:p>.75?(1-p)*4*.5:.5;
+      if(this.life>this.maxLife||this.y<-8||this.x<-8||this.x>W+8) this.init(false);
+    }
+    draw(){
+      ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fillStyle=this.col; ctx.globalAlpha=this.a; ctx.fill();
+    }
+  }
+  function init(){ resize(); for(let i=0;i<110;i++) pts.push(new P()); }
+  function loop(){
+    ctx.clearRect(0,0,W,H); ctx.globalAlpha=1;
+    pts.forEach(p=>{p.step();p.draw();}); ctx.globalAlpha=1;
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize', resize);
+  const hero = document.querySelector('.hero');
+  hero.addEventListener('mousemove', e=>{
+    const r=canvas.getBoundingClientRect();
+    mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top;
   });
+  hero.addEventListener('mouseleave',()=>{ mouse.x=-9999; mouse.y=-9999; });
+  init(); loop();
 })();
 
-/* ══════════════ HERO KNOCKOUT REVEAL */
+/* ══════════════ SOUNDWAVE */
 (function(){
-  const nav = document.getElementById('navbar');
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // reduced motion, or GSAP failed to load → show clean video + nav, no scrub
-  if (reduced || !window.gsap || !window.ScrollTrigger){
-    if (nav) nav.classList.add('nav-revealed');
-    return;
-  }
-  gsap.registerPlugin(ScrollTrigger);
-
-  function build(){
-    // immersive reveal: "POSITIVE" grows from the centre + blurs for depth
-    // while the video pushes in; STORIES grows + blurs the same way;
-    // tint, dots, logo + player fade away to the bare video
-    gsap.timeline({
-      defaults: { ease: 'none' },
-      scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: '+=120%',
-        scrub: 0.6,
-        pin: '.hero-pin',
-        pinSpacing: true,
-        anticipatePin: 1
-      }
-    })
-    // POSITIVE — scale the whole knockout div (centred) + depth blur
-    .to('.hero-knockout', { scale: 7, filter: 'blur(20px)', duration: 1 }, 0)
-    .to('.hero-video-bg', { scale: 1.18, duration: 1 }, 0)     // camera push-in
-    .to('#ko-tint',       { opacity: 0, duration: 0.72 }, 0)
-    .to('.hero-dots',     { opacity: 0, duration: 0.5  }, 0)
-    .to('.hero-logo',     { opacity: 0, y: -34, duration: 0.4 }, 0)
-    // STORIES — grows + blurs in the same fashion, then fades
-    .to('.hero-stories',  { scale: 4.4, filter: 'blur(14px)', opacity: 0, duration: 0.62 }, 0)
-    .to('.hero-ticks',    { opacity: 0, y: 34, duration: 0.4 }, 0)
-    .to('.hero-frame',    { opacity: 0, duration: 0.4 }, 0)
-    .to('.hero-sound',    { autoAlpha: 0, duration: 0.4 }, 0)
-    .to('.hero-knockout', { opacity: 0, duration: 0.32 }, 0.66);
-
-    // navbar slides in once the reveal is mostly complete
-    ScrollTrigger.create({
-      trigger: '.hero',
-      start: 'top top',
-      end: '+=120%',
-      onUpdate: function(self){
-        if (nav) nav.classList.toggle('nav-revealed', self.progress > 0.55);
-      }
-    });
-  }
-
-  // wait for the display webfont so the SVG <text> geometry is final
-  if (document.fonts && document.fonts.ready){
-    document.fonts.ready.then(function(){ build(); ScrollTrigger.refresh(); });
-  } else {
-    build();
+  const wrap=document.getElementById('soundwave');
+  const COLS=['#FF1E9E','#00F0FF','#B7FF00','#A020FF','#00B7FF','#FF7A00','#FFF000'];
+  for(let i=0;i<90;i++){
+    const b=document.createElement('div');
+    b.className='sw-bar';
+    const min=(Math.random()*12+3).toFixed(0);
+    const max=(Math.random()*160+30).toFixed(0);
+    const dur=(Math.random()*.7+.2).toFixed(2);
+    const del=(Math.random()*2).toFixed(2);
+    const col=COLS[Math.floor(Math.random()*COLS.length)];
+    const opa=(Math.random()*.35+.1).toFixed(2);
+    b.style.cssText=`--min:${min}px;--max:${max}px;animation-duration:${dur}s;animation-delay:-${del}s;background:${col};opacity:${opa};`;
+    wrap.appendChild(b);
   }
 })();
 

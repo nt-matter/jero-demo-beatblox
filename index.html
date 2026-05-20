@@ -8,7 +8,7 @@
   <meta property="og:title" content="BeatBlox Studio | AI Video Production, Animation & Creative Content" />
   <meta property="og:description" content="BeatBlox Studio creates AI-powered videos, animated characters, music-driven stories and creative audiovisual content for brands, creators and family entertainment." />
   <meta property="og:type" content="website" />
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
 
     /* ─── TOKENS ──────────────────────────────────────── */
@@ -41,8 +41,12 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 52px;
-      transition: background .4s, backdrop-filter .4s, box-shadow .4s;
+      /* hidden initially — slides in as the page scrolls past the hero */
+      transform: translateY(-130%);
+      transition: transform .55s cubic-bezier(.22,.61,.36,1),
+                  background .4s, backdrop-filter .4s, box-shadow .4s;
     }
+    nav.nav-revealed { transform: translateY(0); }
     nav.scrolled {
       background: rgba(5,5,5,.78);
       backdrop-filter: blur(18px) saturate(160%);
@@ -102,13 +106,215 @@
       box-shadow: 0 0 28px rgba(255,30,158,.6);
     }
 
-    /* ─── HERO ────────────────────────────────────────── */
+    /* ─── HERO (knockout / cinematic reveal variant) ──── */
+    /* tall section gives ScrollTrigger scroll distance to scrub */
     .hero {
       position: relative;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
+      height: 220vh;
+      background: #000;
+    }
+    /* the pinned, viewport-filling stage */
+    .hero-pin {
+      position: relative;
+      height: 100vh;
+      width: 100%;
       overflow: hidden;
+    }
+    .hero-video-bg { z-index: 1; }
+
+    /* knockout overlay — a plain div wrapper so GSAP scales it reliably
+       about its centre (avoids SVG transform-origin quirks) */
+    .hero-knockout {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .hero-knockout-svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    #ko-text {
+      font-family: 'Anton', 'Bungee', sans-serif;
+      font-weight: 400;
+      /* responsive — word spans ~87% of the viewport width */
+      font-size: clamp(4rem, 27vw, 50rem);
+      letter-spacing: clamp(0px, .2vw, 4px);
+      /* stroke fattens the knockout → a heavier wordmark */
+      stroke: #000;
+      stroke-width: clamp(1px, .5vw, 7px);
+    }
+
+    /* dotted texture — subtle (≤.2 opacity), slowly drifting */
+    .hero-dots {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,.5) 1px, transparent 1.7px);
+      background-size: 24px 24px;
+      opacity: .18;
+      animation: dotDrift 19s linear infinite;
+    }
+    @keyframes dotDrift {
+      from { background-position: 0 0; }
+      to   { background-position: 48px 48px; }
+    }
+
+    /* "STORIES" — stacked tight under "POSITIVE".
+       wrapper handles placement; the span carries no transform so GSAP
+       can scale it cleanly about its own centre */
+    .hero-stories-wrap {
+      position: absolute;
+      left: 0; right: 0;
+      top: 50%;
+      z-index: 4;
+      display: flex;
+      justify-content: center;
+      transform: translateY(calc(-50% + clamp(60px, 9vw, 150px)));
+      pointer-events: none;
+    }
+    .hero-stories {
+      display: inline-block;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.5rem, 4.6vw, 3.1rem);
+      letter-spacing: clamp(3px, 1.1vw, 13px);
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 2px 30px rgba(0,0,0,.7);
+      will-change: transform, opacity;
+    }
+
+    /* brand logo on the initial screen */
+    .hero-logo {
+      position: absolute;
+      top: clamp(20px, 4.4vh, 50px);
+      left: 50%;
+      transform: translateX(-50%);
+      height: clamp(60px, 11vh, 104px);
+      width: auto;
+      z-index: 5;
+      filter: drop-shadow(0 0 14px rgba(0,240,255,.4));
+      pointer-events: none;
+    }
+
+    /* abstract video-player cues — decorative only, never read as controls */
+
+    /* viewfinder corner brackets */
+    .hero-frame {
+      position: absolute;
+      inset: clamp(16px, 2.4vw, 36px);
+      z-index: 6;
+      pointer-events: none;
+    }
+    .hf-corner {
+      position: absolute;
+      width: clamp(22px, 2.6vw, 40px);
+      height: clamp(22px, 2.6vw, 40px);
+      border: 2px solid rgba(255,255,255,.5);
+    }
+    .hf-corner.tl { top:0;    left:0;  border-right:0; border-bottom:0; }
+    .hf-corner.tr { top:0;    right:0; border-left:0;  border-bottom:0; }
+    .hf-corner.bl { bottom:0; left:0;  border-right:0; border-top:0; }
+    .hf-corner.br { bottom:0; right:0; border-left:0;  border-top:0; }
+
+    /* abstract timeline — a tick ruler, no fill, no knob, edges faded out */
+    .hero-ticks {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(30px, 5.4vh, 60px);
+      transform: translateX(-50%);
+      width: min(700px, 84vw);
+      height: 26px;
+      z-index: 6;
+      pointer-events: none;
+      border-bottom: 1px solid rgba(255,255,255,.28);
+      /* minor + major ticks rising from the baseline */
+      background-image:
+        repeating-linear-gradient(90deg, rgba(255,255,255,.5) 0 1px, transparent 1px 12px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.75) 0 1.5px, transparent 1.5px 72px);
+      background-repeat: repeat-x, repeat-x;
+      background-size: 12px 8px, 72px 17px;
+      background-position: bottom left, bottom left;
+      -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+              mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+    }
+    /* the playhead — a thin scanning accent line, not a draggable handle */
+    .hero-ticks::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 12%;
+      width: 2px;
+      height: 26px;
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(183,255,0,.9);
+      animation: tickScan 13s ease-in-out infinite alternate;
+    }
+    @keyframes tickScan { from { left: 10%; } to { left: 90%; } }
+
+    /* sound toggle — small round button, bottom-right */
+    .hero-sound {
+      position: absolute;
+      right: clamp(24px, 4vw, 60px);
+      bottom: clamp(24px, 4vw, 60px);
+      z-index: 7;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.3);
+      background: rgba(10,10,10,.5);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      pointer-events: auto;
+      transition: background .25s, border-color .25s, transform .25s;
+    }
+    .hero-sound:hover { transform: scale(1.08); }
+    .hero-sound:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+    .hero-sound svg { width: 21px; height: 21px; display: block; }
+    .hero-sound .hs-spk    { fill: #fff; }
+    .hero-sound .hs-waves  { stroke: #fff; }
+    .hero-sound .hs-slash  { stroke: #fff; }
+    /* muted state → show the slash, hide the sound waves */
+    .hero-sound .hs-slash  { display: none; }
+    .hero-sound.muted .hs-waves { display: none; }
+    .hero-sound.muted .hs-slash { display: block; }
+    /* sound-on state → green accent */
+    .hero-sound:not(.muted) {
+      border-color: var(--green);
+      background: rgba(183,255,0,.16);
+    }
+    .hero-sound:not(.muted) .hs-spk   { fill: var(--green); }
+    .hero-sound:not(.muted) .hs-waves { stroke: var(--green); }
+
+    /* visually-hidden accessible heading */
+    .hero-sr-title {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* reduced motion — show the clean video + nav immediately, no scrub */
+    @media (prefers-reduced-motion: reduce) {
+      .hero { height: 100vh; }
+      .hero-knockout, .hero-stories, .hero-dots,
+      .hero-logo, .hero-frame, .hero-ticks { opacity: 0; }
+      .hero-ticks::after, .hero-dots { animation: none; }
+      nav { transform: translateY(0); transition: none; }
     }
 
     /* ── youtube video background ── */
@@ -913,44 +1119,48 @@
 
     /* ─── SERVICES — TRACK LISTING ───────────────────── */
     .services-section { background: var(--dark2); }
-    .track-list { max-width:900px; margin:0 auto; padding:0 56px 80px; }
+    .track-list {
+      max-width: 1360px; margin: 0 auto; padding: 0 56px 80px;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 2px;
+    }
     .track-item {
-      display:grid; grid-template-columns:52px 3px 1fr 32px;
-      gap:0 24px; align-items:center; padding:24px 0;
-      border-bottom:1px solid rgba(255,255,255,.06);
-      cursor:pointer; position:relative; overflow:hidden;
-      transition:background .25s;
+      display: grid; grid-template-columns: 68px 3px 1fr;
+      gap: 0 20px; align-items: center;
+      padding: 36px 28px;
+      border: 1px solid rgba(255,255,255,.07);
+      position: relative; overflow: hidden;
+      transition: border-color .3s;
     }
     .track-item::before {
       content:''; position:absolute; inset:0;
-      background:linear-gradient(to right, rgba(var(--rgb),.06), transparent 60%);
+      background: linear-gradient(135deg, rgba(var(--rgb),.08) 0%, transparent 65%);
       opacity:0; transition:opacity .3s;
     }
     .track-item:hover::before { opacity:1; }
+    .track-item:hover { border-color: rgba(var(--rgb),.3); }
     .track-num {
       font-family:'Space Mono',monospace;
-      font-size:1rem; color:rgba(255,255,255,.15);
-      text-align:right; transition:color .25s;
+      font-size: 2.6rem; color:rgba(255,255,255,.13);
+      text-align:right; transition:color .25s; line-height:1;
     }
-    .track-item:hover .track-num { color:rgba(var(--rgb),.7); }
-    .track-bar { width:3px; height:44px; background:var(--accent); transition:box-shadow .3s; }
-    .track-item:hover .track-bar { box-shadow:0 0 12px var(--accent); }
-    .track-body { padding:0 4px; }
+    .track-item:hover .track-num { color:rgba(var(--rgb),.55); }
+    .track-bar {
+      width: 3px; align-self: stretch; min-height: 54px;
+      background: var(--accent); transition: box-shadow .3s;
+    }
+    .track-item:hover .track-bar { box-shadow: 0 0 14px var(--accent); }
+    .track-body { padding: 0 4px; }
     .track-title {
       font-family:'Bungee',sans-serif;
-      font-size:clamp(1rem,2.2vw,1.45rem);
-      color:#fff; transition:color .25s; line-height:1.1;
+      font-size: clamp(.92rem,1.5vw,1.15rem);
+      color:#fff; transition:color .25s; line-height:1.2;
+      margin-bottom: 10px;
     }
     .track-item:hover .track-title { color:var(--accent); }
     .track-desc {
-      font-size:.96rem; color:rgba(255,255,255,.45);
-      line-height:1.6; max-height:0; overflow:hidden;
-      transition:max-height .4s ease, margin .4s ease; margin-top:0;
+      font-size: .88rem; color:rgba(255,255,255,.42);
+      line-height: 1.65;
     }
-    .track-item.open .track-desc { max-height:60px; margin-top:8px; }
-    .track-arrow { font-size:1rem; color:rgba(255,255,255,.2); transition:transform .3s, color .3s; text-align:center; }
-    .track-item:hover .track-arrow { color:var(--accent); }
-    .track-item.open .track-arrow { transform:rotate(90deg); color:var(--accent); }
 
     /* ─── STATS ───────────────────────────────────────── */
     /* shared inner box — 1360px */
@@ -1041,7 +1251,7 @@
     .what-tags-row { display:flex; gap:12px; flex-shrink:0; width:max-content; }
     .what-tags-row-1 { animation:mLeft  34s linear infinite; }
     .what-tags-row-2 { animation:mRight 40s linear infinite; }
-    .what-section:hover .what-tags-row { animation-play-state:paused; }
+    /* .what-section:hover .what-tags-row — movimento continuo, sin pausa */
     .what-tag {
       font-family:'Poppins',sans-serif;
       font-size:clamp(.88rem,1.3vw,1.08rem); font-weight:600;
@@ -1129,9 +1339,12 @@
     }
     .why-card:hover::after { opacity:1; }
     .why-icon {
-      font-size:1.8rem; margin-bottom:16px; display:block; line-height:1;
-      filter: drop-shadow(0 0 8px var(--wc-color));
+      width: 34px; height: 34px; display: block;
+      margin-bottom: 18px;
+      color: var(--wc-color);
+      filter: drop-shadow(0 0 7px var(--wc-color)) drop-shadow(0 0 18px var(--wc-color));
     }
+    .why-icon svg { width: 100%; height: 100%; display: block; }
     .why-title {
       font-family:'Poppins',sans-serif; font-size:.95rem; font-weight:700;
       color:#fff; margin-bottom:10px;
@@ -1159,12 +1372,21 @@
     .cf-col-0 { animation:cfUp 28s linear infinite; }
     .cf-col-1 { animation:cfUp 36s linear infinite; animation-delay:-10s; }
     .cf-col-2 { animation:cfUp 22s linear infinite; animation-delay:-5s; }
-    .community-section:hover .cf-col { animation-play-state:paused; }
+    /* .community-section:hover .cf-col — movimento continuo, sin pausa */
     @keyframes cfUp { from{transform:translateY(0)} to{transform:translateY(-50%)} }
     .comment-card { background:#1a1a1a; border:1px solid rgba(255,255,255,.09); border-radius:14px; padding:14px 16px 12px; position:relative; transition:background .2s, box-shadow .2s; flex-shrink:0; }
     .comment-card:hover { background:#222; box-shadow:0 4px 24px rgba(0,0,0,.4); }
+    /* ── light variant ── */
+    .comment-card.light { background:#f0f0f0; border-color:rgba(0,0,0,.08); }
+    .comment-card.light:hover { background:#e6e6e6; box-shadow:0 4px 20px rgba(0,0,0,.14); }
+    .comment-card.light .cc-user  { color:#111; }
+    .comment-card.light .cc-text  { color:rgba(0,0,0,.72); }
+    .comment-card.light .cc-platform-badge { color:rgba(0,0,0,.42); }
+    .comment-card.light .cc-likes { color:rgba(0,0,0,.4); }
+    .comment-card.light .cc-time  { color:rgba(0,0,0,.28); }
     .cc-meta { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
-    .cc-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Poppins',sans-serif; background:rgba(var(--cc-rgb),.22); border:1.5px solid rgba(var(--cc-rgb),.35); }
+    .cc-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.7rem; font-weight:700; color:#fff; flex-shrink:0; font-family:'Poppins',sans-serif; background:rgba(var(--cc-rgb),.22); border:1.5px solid rgba(var(--cc-rgb),.35); overflow:hidden; }
+    .cc-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
     .cc-info { flex:1; min-width:0; }
     .cc-user { font-family:'Poppins',sans-serif; font-size:.8rem; font-weight:600; color:#fff; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .cc-platform-badge { display:inline-flex; align-items:center; gap:4px; font-family:'Poppins',sans-serif; font-size:.65rem; font-weight:500; color:rgba(255,255,255,.38); margin-top:1px; }
@@ -1316,15 +1538,17 @@
       .hero-ctas  { justify-content: center; }
 
       /* ── 4 col → 2 col ── */
-      .proc-steps  { grid-template-columns: repeat(2,1fr); }
-      .why-grid    { grid-template-columns: repeat(2,1fr); }
-      .stats-inner { grid-template-columns: repeat(2,1fr); }
+      .track-list    { grid-template-columns: repeat(2,1fr); padding: 0 24px 60px; }
+      .proc-steps    { grid-template-columns: repeat(2,1fr); }
+      .why-grid      { grid-template-columns: repeat(2,1fr); }
+      .stats-inner   { grid-template-columns: repeat(2,1fr); }
       .platform-grid { grid-template-columns: repeat(2,1fr); }
       .comment-feed  { grid-template-columns: repeat(2,1fr); height:480px; }
     }
 
     @media (max-width: 540px) {
       /* ── 2 col → 1 col ── */
+      .track-list    { grid-template-columns: 1fr; padding: 0 20px 48px; }
       .proc-steps    { grid-template-columns: 1fr; }
       .why-grid      { grid-template-columns: 1fr; }
       .stats-inner   { grid-template-columns: repeat(2,1fr); } /* stats queda en 2 en mobile */
@@ -1358,92 +1582,67 @@
 </nav>
 
 <!-- ══════════════════════ HERO -->
-<section class="hero">
+<section class="hero" id="hero">
+  <div class="hero-pin">
 
-  <!-- VIDEO BACKGROUND — YouTube, correr desde http://localhost:8000 -->
-  <div class="hero-video-bg">
-    <iframe
-      src="https://www.youtube-nocookie.com/embed/ILU3mWBxMBY?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&rel=0&modestbranding=1&playlist=ILU3mWBxMBY&playsinline=1&disablekb=1&fs=0&iv_load_policy=3"
-      allow="autoplay; encrypted-media"
-      title="BeatBlox background"
-      aria-hidden="true"
-      tabindex="-1"
-    ></iframe>
-  </div>
-
-  <div class="hero-video-black"></div>
-  <div class="hero-overlay"></div>
-  <div class="hero-tint"></div>
-  <div class="hero-grid"></div>
-  <canvas id="particles"></canvas>
-
-  <!-- corner accents -->
-  <div class="cacc cacc-tl"></div>
-  <div class="cacc cacc-tr"></div>
-  <div class="cacc cacc-bl"></div>
-  <div class="cacc cacc-br"></div>
-
-  <!-- TWO-COLUMN -->
-  <div class="hero-inner">
-
-    <!-- LEFT: logo -->
-    <div class="hero-left">
-      <div class="logo-wrap">
-        <div class="logo-glow"></div>
-        <img src="imagen/logo.png" alt="BeatBlox" class="logo-img" />
-      </div>
-      <p class="hero-studio">Studio</p>
+    <!-- VIDEO BACKGROUND — built by the YouTube IFrame API (see hero script).
+         Looping is done via the API (no playlist= param) so YouTube shows
+         no prev/next chrome. -->
+    <div class="hero-video-bg">
+      <div id="hero-yt"></div>
     </div>
 
-    <!-- RIGHT: text -->
-    <div class="hero-right">
+    <!-- dotted texture overlay -->
+    <div class="hero-dots" aria-hidden="true"></div>
 
-      <h1 class="hero-tagline">
-        <span class="glitch-line t-pink"  data-text="Cool songs.">Cool songs.</span>
-        <span class="glitch-line t-green" data-text="Wild characters.">Wild characters.</span>
-        <span class="glitch-line t-cyan"  data-text="Positive stories.">Positive stories.</span>
-      </h1>
-
-      <div class="text-divider"></div>
-
-      <p class="hero-body">
-        BeatBlox Studio makes music-driven animated videos, colorful characters
-        and AI-powered visual stories — for kids, families, creators and brands.
-      </p>
-
-      <p class="hero-body-2">
-        Family-friendly videos kids love, and parents can actually enjoy too.
-        We mix hip hop, rock, pop, animation and playful storytelling into content
-        built for YouTube, TikTok, Shorts, Reels and beyond.
-      </p>
-
-      <div class="platforms">
-        <span class="pill">YouTube</span>
-        <span class="pill">TikTok</span>
-        <span class="pill">Instagram</span>
-        <span class="pill">Shorts</span>
-        <span class="pill">Reels</span>
-        <span class="pill">Facebook</span>
-      </div>
-
-      <div class="hero-ctas">
-        <a href="#" class="btn-primary">Start a Project</a>
-        <a href="https://www.youtube.com/channel/UCgWg4iu5KpJBNjA1kAadmeg/"
-           target="_blank" class="btn-secondary">▶&nbsp; Watch on YouTube</a>
-      </div>
-
+    <!-- knockout overlay: near-black tint punched out by "POSITIVE".
+         No viewBox — user units == CSS px, so #ko-text can size with vw. -->
+    <div class="hero-knockout" aria-hidden="true">
+      <svg class="hero-knockout-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <mask id="positiveMask">
+            <rect width="100%" height="100%" fill="#fff" />
+            <text id="ko-text" x="50%" y="50%" text-anchor="middle"
+                  dominant-baseline="central" fill="#000">POSITIVE</text>
+          </mask>
+        </defs>
+        <rect id="ko-tint" width="100%" height="100%"
+              fill="#000000" opacity="0.9" mask="url(#positiveMask)" />
+      </svg>
     </div>
-  </div><!-- /hero-inner -->
 
-  <!-- soundwave -->
-  <div class="soundwave-wrap" id="soundwave"></div>
+    <!-- brand logo (initial screen) -->
+    <img src="imagen/logo.png" alt="BeatBlox" class="hero-logo" />
 
-  <!-- scroll hint -->
-  <div class="scroll-hint">
-    <div class="scroll-line"></div>
-    <span>Scroll</span>
+    <!-- "STORIES" — stacked under "POSITIVE" -->
+    <div class="hero-stories-wrap" aria-hidden="true">
+      <span class="hero-stories">Stories</span>
+    </div>
+
+    <!-- abstract video-player cues — decorative only -->
+    <div class="hero-frame" aria-hidden="true">
+      <i class="hf-corner tl"></i><i class="hf-corner tr"></i>
+      <i class="hf-corner bl"></i><i class="hf-corner br"></i>
+    </div>
+    <div class="hero-ticks" aria-hidden="true"></div>
+
+    <!-- sound toggle (bottom-right) -->
+    <button class="hero-sound muted" type="button" aria-label="Unmute video">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path class="hs-spk" d="M4 9v6h4l5 4V5L8 9H4z" />
+        <g class="hs-waves" fill="none" stroke-width="2" stroke-linecap="round">
+          <path d="M16.5 8.6a4.6 4.6 0 0 1 0 6.8" />
+          <path d="M19.4 5.8a8.3 8.3 0 0 1 0 12.4" />
+        </g>
+        <line class="hs-slash" x1="3.4" y1="20.6" x2="20.6" y2="3.4"
+              stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- accessible heading (visually hidden) -->
+    <h1 class="hero-sr-title">Positive Stories — BeatBlox Studio</h1>
+
   </div>
-
 </section>
 
 <!-- ══════════════════════ MARQUEE -->
@@ -1602,42 +1801,42 @@
     </div>
     <div class="why-grid">
       <div class="why-card" style="--wc-color:var(--pink)">
-        <span class="why-icon" style="color:var(--pink)">⚡</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
         <h3 class="why-title">Fast Creative Production</h3>
         <p class="why-desc">From concept to delivery — fast, flexible and built for today's content pace.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--cyan)">
-        <span class="why-icon" style="color:var(--cyan)">🤖</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="6" height="6" rx="1"/><line x1="9" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="15" y2="12"/><line x1="12" y1="9" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="15"/><line x1="5.64" y1="5.64" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="18.36" y2="18.36"/><line x1="18.36" y1="5.64" x2="16.24" y2="7.76"/><line x1="7.76" y1="16.24" x2="5.64" y2="18.36"/></svg></span>
         <h3 class="why-title">AI-Enhanced Workflows</h3>
         <p class="why-desc">We combine creative direction with AI-powered tools for smarter, faster production.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--green)">
-        <span class="why-icon" style="color:var(--green)">✦</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
         <h3 class="why-title">Original Characters & Worlds</h3>
         <p class="why-desc">We build characters, stories and visual universes that are 100% ours — and yours.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--yellow)">
-        <span class="why-icon" style="color:var(--yellow)">♪</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
         <h3 class="why-title">Music-Driven Storytelling</h3>
         <p class="why-desc">Every piece starts with a rhythm — music is at the heart of everything we create.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--purple)">
-        <span class="why-icon" style="color:var(--purple)">📱</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="8" y1="21" x2="16" y2="21"/><polygon points="10 8 16 11 10 14 10 8"/></svg></span>
         <h3 class="why-title">Built for Digital Platforms</h3>
         <p class="why-desc">YouTube, TikTok, Instagram, Shorts, Reels — content made to perform where it lives.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--orange)">
-        <span class="why-icon" style="color:var(--orange)">🎯</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
         <h3 class="why-title">Flexible for Any Project</h3>
         <p class="why-desc">Brands, creators, entertainment projects — we adapt to what you need and how you work.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--cyan)">
-        <span class="why-icon" style="color:var(--cyan)">👨‍👩‍👧</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
         <h3 class="why-title">Family-Friendly & Commercial</h3>
         <p class="why-desc">Content kids love to watch — and parents actually enjoy too. Clean, positive and fun.</p>
       </div>
       <div class="why-card" style="--wc-color:var(--pink)">
-        <span class="why-icon" style="color:var(--pink)">🎨</span>
+        <span class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="8.5" x2="22" y2="8.5"/><line x1="2" y1="15.5" x2="22" y2="15.5"/></svg></span>
         <h3 class="why-title">Strong Visual Identity</h3>
         <p class="why-desc">Bold visuals, a clear design language and creative direction that makes your content stand out.</p>
       </div>
@@ -1750,74 +1949,122 @@
 </footer>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-/* ══════════════ PARTICLES */
+/* ══════════════ HERO BACKGROUND VIDEO (YouTube IFrame API) */
+var heroPlayer = null;
 (function(){
-  const canvas = document.getElementById('particles');
-  const ctx = canvas.getContext('2d');
-  let W, H, mouse = {x:-9999, y:-9999};
-  const COLS = ['#FF1E9E','#00F0FF','#A020FF','#00B7FF','#7FFF00'];
-  const pts = [];
-
-  function resize(){
-    W = canvas.width  = canvas.offsetWidth;
-    H = canvas.height = canvas.offsetHeight;
-  }
-  class P {
-    constructor(){ this.init(true); }
-    init(rnd){
-      this.x  = Math.random()*W;
-      this.y  = rnd ? Math.random()*H : H+8;
-      this.vx = (Math.random()-.5)*.5;
-      this.vy = -(Math.random()*.55+.15);
-      this.r  = Math.random()*1.8+.4;
-      this.col = COLS[Math.floor(Math.random()*COLS.length)];
-      this.life=0; this.maxLife=Math.random()*260+180;
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+function onYouTubeIframeAPIReady(){
+  heroPlayer = new YT.Player('hero-yt', {
+    videoId: 'ILU3mWBxMBY',
+    playerVars: {
+      autoplay: 1, mute: 1, controls: 0, playsinline: 1,
+      /* loop=1 + playlist (same id) is YouTube's official way to
+         loop a single video reliably */
+      loop: 1, playlist: 'ILU3mWBxMBY',
+      modestbranding: 1, rel: 0, disablekb: 1, fs: 0, iv_load_policy: 3
+    },
+    events: {
+      onReady: function(e){
+        e.target.mute();
+        e.target.playVideo();
+        const f = e.target.getIframe();
+        f.setAttribute('aria-hidden', 'true');
+        f.setAttribute('tabindex', '-1');
+        f.setAttribute('title', 'BeatBlox background');
+      },
+      onStateChange: function(e){
+        // belt-and-suspenders loop fallback
+        if (e.data === YT.PlayerState.ENDED){
+          e.target.seekTo(0);
+          e.target.playVideo();
+        }
+      }
     }
-    step(){
-      const dx=this.x-mouse.x, dy=this.y-mouse.y, d=Math.hypot(dx,dy);
-      if(d<90){ const f=(90-d)/90; this.vx+=(dx/d)*f*.3; this.vy+=(dy/d)*f*.3; }
-      this.vx*=.97; this.vy*=.97; this.x+=this.vx; this.y+=this.vy; this.life++;
-      const p=this.life/this.maxLife;
-      this.a = p<.1?p*10*.5:p>.75?(1-p)*4*.5:.5;
-      if(this.life>this.maxLife||this.y<-8||this.x<-8||this.x>W+8) this.init(false);
-    }
-    draw(){
-      ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
-      ctx.fillStyle=this.col; ctx.globalAlpha=this.a; ctx.fill();
-    }
-  }
-  function init(){ resize(); for(let i=0;i<110;i++) pts.push(new P()); }
-  function loop(){
-    ctx.clearRect(0,0,W,H); ctx.globalAlpha=1;
-    pts.forEach(p=>{p.step();p.draw();}); ctx.globalAlpha=1;
-    requestAnimationFrame(loop);
-  }
-  window.addEventListener('resize', resize);
-  const hero = document.querySelector('.hero');
-  hero.addEventListener('mousemove', e=>{
-    const r=canvas.getBoundingClientRect();
-    mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top;
   });
-  hero.addEventListener('mouseleave',()=>{ mouse.x=-9999; mouse.y=-9999; });
-  init(); loop();
+}
+
+/* ══════════════ HERO SOUND TOGGLE */
+(function(){
+  const btn = document.querySelector('.hero-sound');
+  if (!btn) return;
+  btn.addEventListener('click', function(){
+    if (!heroPlayer || typeof heroPlayer.isMuted !== 'function') return;
+    if (heroPlayer.isMuted()){
+      heroPlayer.unMute();
+      heroPlayer.setVolume(100);
+      btn.classList.remove('muted');
+      btn.setAttribute('aria-label', 'Mute video');
+    } else {
+      heroPlayer.mute();
+      btn.classList.add('muted');
+      btn.setAttribute('aria-label', 'Unmute video');
+    }
+  });
 })();
 
-/* ══════════════ SOUNDWAVE */
+/* ══════════════ HERO KNOCKOUT REVEAL */
 (function(){
-  const wrap=document.getElementById('soundwave');
-  const COLS=['#FF1E9E','#00F0FF','#B7FF00','#A020FF','#00B7FF','#FF7A00','#FFF000'];
-  for(let i=0;i<90;i++){
-    const b=document.createElement('div');
-    b.className='sw-bar';
-    const min=(Math.random()*12+3).toFixed(0);
-    const max=(Math.random()*160+30).toFixed(0);
-    const dur=(Math.random()*.7+.2).toFixed(2);
-    const del=(Math.random()*2).toFixed(2);
-    const col=COLS[Math.floor(Math.random()*COLS.length)];
-    const opa=(Math.random()*.35+.1).toFixed(2);
-    b.style.cssText=`--min:${min}px;--max:${max}px;animation-duration:${dur}s;animation-delay:-${del}s;background:${col};opacity:${opa};`;
-    wrap.appendChild(b);
+  const nav = document.getElementById('navbar');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // reduced motion, or GSAP failed to load → show clean video + nav, no scrub
+  if (reduced || !window.gsap || !window.ScrollTrigger){
+    if (nav) nav.classList.add('nav-revealed');
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
+
+  function build(){
+    // immersive reveal: "POSITIVE" grows from the centre + blurs for depth
+    // while the video pushes in; STORIES grows + blurs the same way;
+    // tint, dots, logo + player fade away to the bare video
+    gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: '+=120%',
+        scrub: 0.6,
+        pin: '.hero-pin',
+        pinSpacing: true,
+        anticipatePin: 1
+      }
+    })
+    // POSITIVE — scale the whole knockout div (centred) + depth blur
+    .to('.hero-knockout', { scale: 7, filter: 'blur(20px)', duration: 1 }, 0)
+    .to('.hero-video-bg', { scale: 1.18, duration: 1 }, 0)     // camera push-in
+    .to('#ko-tint',       { opacity: 0, duration: 0.72 }, 0)
+    .to('.hero-dots',     { opacity: 0, duration: 0.5  }, 0)
+    .to('.hero-logo',     { opacity: 0, y: -34, duration: 0.4 }, 0)
+    // STORIES — grows + blurs in the same fashion, then fades
+    .to('.hero-stories',  { scale: 4.4, filter: 'blur(14px)', opacity: 0, duration: 0.62 }, 0)
+    .to('.hero-ticks',    { opacity: 0, y: 34, duration: 0.4 }, 0)
+    .to('.hero-frame',    { opacity: 0, duration: 0.4 }, 0)
+    .to('.hero-sound',    { autoAlpha: 0, duration: 0.4 }, 0)
+    .to('.hero-knockout', { opacity: 0, duration: 0.32 }, 0.66);
+
+    // navbar slides in once the reveal is mostly complete
+    ScrollTrigger.create({
+      trigger: '.hero',
+      start: 'top top',
+      end: '+=120%',
+      onUpdate: function(self){
+        if (nav) nav.classList.toggle('nav-revealed', self.progress > 0.55);
+      }
+    });
+  }
+
+  // wait for the display webfont so the SVG <text> geometry is final
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ build(); ScrollTrigger.refresh(); });
+  } else {
+    build();
   }
 })();
 
@@ -1865,14 +2112,9 @@
         <div class="track-title">${s.title}</div>
         <div class="track-desc">${s.desc}</div>
       </div>
-      <span class="track-arrow">→</span>
     </div>`).join('');
   list.querySelectorAll('.track-item').forEach(item=>{
-    item.addEventListener('click',()=>{
-      const wasOpen = item.classList.contains('open');
-      list.querySelectorAll('.track-item').forEach(i=>i.classList.remove('open'));
-      if(!wasOpen) item.classList.add('open');
-    });
+    // no accordion — content always visible
   });
 })();
 
@@ -1929,29 +2171,41 @@
 
 /* ══════════════ MODULE 1 — WORK CAROUSEL */
 (function(){
+  // short:true  → card vertical 9:16 (158px)
+  // videoId sin short → card horizontal con thumbnail real (420px)
   const row1Data=[
-    {title:'Rhythm World',   cat:'Animated Series',       c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E'},
-    {title:'BeatBlox Short', cat:'YouTube Short',         c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E',videoId:'VCxklrIQoXA'},
-    {title:'Neon Pack',      cat:'Character Design',      c1:'#B7FF00',c2:'#00F0FF',glow:'#B7FF00'},
-    {title:'BeatBlox Short', cat:'YouTube Short',         c1:'#00F0FF',c2:'#00B7FF',glow:'#00F0FF',videoId:'SFDvZrZg7vA'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E', videoId:'MnqsrAvlOro', short:true},
+    {title:'We Legends',              cat:'Music Video',     c1:'#00F0FF',c2:'#00B7FF',glow:'#00F0FF', videoId:'ILU3mWBxMBY'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#B7FF00',c2:'#00F0FF',glow:'#B7FF00', videoId:'w0uPNnznHW0', short:true},
+    {title:'Figuritas del Mundial',   cat:'Music Video',     c1:'#FFF000',c2:'#B7FF00',glow:'#FFF000', videoId:'CIjm-n4Phtc'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#FF7A00',c2:'#FF1E9E',glow:'#FF7A00', videoId:'MnqsrAvlOro', short:true},
+    {title:'Original Project',        cat:'Animation',       c1:'#00B7FF',c2:'#A020FF',glow:'#00B7FF', videoId:'E-E61advlVU'},
   ];
   const row2Data=[
-    {title:'Kids Jam Vol.2', cat:'Family Content',        c1:'#00F0FF',c2:'#A020FF',glow:'#00F0FF'},
-    {title:'BeatBlox Short', cat:'YouTube Short',         c1:'#B7FF00',c2:'#00F0FF',glow:'#B7FF00',videoId:'a4C8MF-_OaE'},
-    {title:'Bass Line',      cat:'Music Visualizer',      c1:'#00B7FF',c2:'#A020FF',glow:'#00B7FF'},
-    {title:'Wild Crew',      cat:'Character Pack',        c1:'#A020FF',c2:'#B7FF00',glow:'#A020FF'},
+    {title:'Figuritas del Mundial',   cat:'Music Video',     c1:'#B7FF00',c2:'#FFF000',glow:'#B7FF00', videoId:'CIjm-n4Phtc'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#A020FF',c2:'#00B7FF',glow:'#A020FF', videoId:'w0uPNnznHW0', short:true},
+    {title:'Original Project',        cat:'Animation',       c1:'#FF1E9E',c2:'#FF7A00',glow:'#FF1E9E', videoId:'E-E61advlVU'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#00F0FF',c2:'#B7FF00',glow:'#00F0FF', videoId:'MnqsrAvlOro', short:true},
+    {title:'We Legends',              cat:'Music Video',     c1:'#00B7FF',c2:'#A020FF',glow:'#00B7FF', videoId:'ILU3mWBxMBY'},
+    {title:'BeatBlox Short',          cat:'YouTube Shorts',  c1:'#FFF000',c2:'#FF7A00',glow:'#FFF000', videoId:'w0uPNnznHW0', short:true},
   ];
   function buildCard(d){
-    const isVideo=!!d.videoId;
-    const thumb=isVideo?`<div class="car-thumb" style="background-image:url(https://img.youtube.com/vi/${d.videoId}/maxresdefault.jpg)"></div>`:`<div class="car-card-bg"></div>`;
-    const vl=isVideo?`<div class="car-video-layer"></div>`:'';
-    const badge=isVideo?`<div class="car-shorts-badge">Shorts</div>`:'';
-    return `<div class="car-card${isVideo?' has-car-video':''}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${isVideo?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
+    const isShort = d.short && !!d.videoId;
+    const hasVid  = !!d.videoId;
+    const thumb = hasVid
+      ? `<div class="car-thumb" style="background-image:url(https://img.youtube.com/vi/${d.videoId}/maxresdefault.jpg)"></div>`
+      : `<div class="car-card-bg"></div>`;
+    const vl    = hasVid ? `<div class="car-video-layer"></div>` : '';
+    const badge = isShort ? `<div class="car-shorts-badge">Shorts</div>` : '';
+    const cls   = `car-card${isShort ? ' has-car-video' : ''}`;
+    return `<div class="${cls}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${hasVid?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
   }
   function fill(id,data){const el=document.getElementById(id);el.innerHTML=data.map(buildCard).join('')+data.map(buildCard).join('');}
   fill('carRow1',row1Data); fill('carRow2',row2Data);
-  document.querySelectorAll('.has-car-video').forEach(card=>{
+  // activar hover-to-play en todos los cards con video (shorts y horizontales)
+  document.querySelectorAll('[data-vid]').forEach(card=>{
     const vid=card.dataset.vid, layer=card.querySelector('.car-video-layer');
+    if(!layer) return;
     let t;
     card.addEventListener('mouseenter',()=>{
       clearTimeout(t);
@@ -1976,13 +2230,13 @@
     {title:'Chicken Banana Disco',     cat:'AI Animation', sub:'Funny Animated Kids Song by BeatBlox',                              c1:'#FF1E9E',c2:'#A020FF',glow:'#FF1E9E',videoId:'LJuGD82CYmU'},
     {title:'We Legends',               cat:'Music Video',  sub:'Una aventura musical inspirada en la Copa del Mundo 2026',           c1:'#00F0FF',c2:'#00B7FF',glow:'#00F0FF',videoId:'ILU3mWBxMBY'},
     {title:'Figuritas del Mundial 2026',cat:'Music Video', sub:'Cuando el álbum cobra vida ⚽✨ · BeatBlox',                          c1:'#B7FF00',c2:'#FFF000',glow:'#B7FF00',videoId:'CIjm-n4Phtc'},
-    {title:'Neon Pack Vol.1', cat:'Original Characters', sub:'Character design, animation & world-building', c1:'#A020FF',c2:'#00F0FF',glow:'#A020FF'},
-    {title:'Color Splash',    cat:'Brand Campaign',      sub:'Creative campaign built for social & digital', c1:'#FF7A00',c2:'#FF1E9E',glow:'#FF7A00'},
-    {title:'Groove Station',  cat:'YouTube Series',      sub:'Family entertainment — music & storytelling',  c1:'#FFF000',c2:'#FF7A00',glow:'#FFF000'},
+    {title:'BeatBlox Original',  cat:'Music Video',  sub:'Original music & animation by BeatBlox Studio',      c1:'#A020FF',c2:'#00F0FF',glow:'#A020FF',videoId:'9vLMlV0ZPrU'},
+    {title:'BeatBlox Original',  cat:'Music Video',  sub:'Creative audiovisual content for kids & families',    c1:'#FF7A00',c2:'#FF1E9E',glow:'#FF7A00',videoId:'UVYHAO-zmvk'},
+    {title:'BeatBlox Original',  cat:'Music Video',  sub:'Rhythm, color and personality — BeatBlox Studio',     c1:'#FFF000',c2:'#FF7A00',glow:'#FFF000',videoId:'FQCCa6iqtFQ'},
   ];
   const grid=document.getElementById('wgGrid');
   grid.innerHTML=projects.map(p=>{
-    const inner=p.videoId?`<div class="wg-video-thumb" style="background-image:url(https://img.youtube.com/vi/${p.videoId}/maxresdefault.jpg)"></div><div class="wg-video-layer"></div>`:`<div class="wg-card-bg"></div>`;
+    const inner=p.videoId?`<div class="wg-video-thumb" style="background-image:url(https://img.youtube.com/vi/${p.videoId}/hqdefault.jpg)"></div><div class="wg-video-layer"></div>`:`<div class="wg-card-bg"></div>`;
     return `<div class="wg-card${p.videoId?' has-video':''}" style="--c1:${p.c1};--c2:${p.c2};--card-glow:${p.glow}"${p.videoId?` data-video="${p.videoId}"`:''}>${inner}<div class="wg-card-overlay"></div><div class="wg-playing"><div class="blink-dot"></div>Now Playing</div><div class="wg-info"><span class="wg-cat">${p.cat}</span><h3 class="wg-title">${p.title}</h3><p class="wg-sub">${p.sub}</p><span class="wg-cta">View Project <span class="wg-cta-arrow">→</span></span></div></div>`;
   }).join('');
   grid.querySelectorAll('.has-video').forEach(card=>{
@@ -2021,33 +2275,38 @@
     pgrid.appendChild(c);
   });
   const comments=[
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@PixelMommy',      initials:'PM',text:'My kids rewatch this every single day 😭🔥',              likes:'1.4K',time:'2h'},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@PixelMommy',      initials:'PM',text:'My kids rewatch this every single day 😭🔥',              likes:'1.4K',time:'2h',  photo:'https://randomuser.me/api/portraits/women/44.jpg'},
     {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@groove_fan99',    initials:'GF',text:'This beat goes HARD for a kids channel lol',             likes:'892', time:'5h'},
-    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@creativekidsmx',  initials:'CK',text:'The animation style is next level ✨',                    likes:'634', time:'1d'},
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@DadOfThree',      initials:'D3',text:'Finally something my 5yo and I BOTH enjoy',              likes:'2.1K',time:'3h'},
-    {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@FamilyVibesMX',   initials:'FV',text:'Shared this with our whole parent group!',               likes:'447', time:'6h'},
+    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@creativekidsmx',  initials:'CK',text:'The animation style is next level ✨',                    likes:'634', time:'1d',  light:true},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@DadOfThree',      initials:'D3',text:'Finally something my 5yo and I BOTH enjoy',              likes:'2.1K',time:'3h',  light:true, photo:'https://randomuser.me/api/portraits/men/32.jpg'},
+    {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@FamilyVibesMX',   initials:'FV',text:'Shared this with our whole parent group!',               likes:'447', time:'6h',  photo:'https://randomuser.me/api/portraits/women/68.jpg'},
     {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@beatfan2024',     initials:'BF',text:'The characters are so charming, love them 💚',           likes:'1.1K',time:'4h'},
     {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@kidsmediawatch',  initials:'KM',text:'BeatBlox is doing something really unique here',         likes:'788', time:'2d'},
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@NightOwlDad',     initials:'NO',text:'Put this on at bedtime, they were OUT in 10 min 😂',     likes:'3.2K',time:'1h'},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@NightOwlDad',     initials:'NO',text:'Put this on at bedtime, they were OUT in 10 min 😂',     likes:'3.2K',time:'1h',  light:true, photo:'https://randomuser.me/api/portraits/men/54.jpg'},
     {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@AnimaFamilyFun',  initials:'AF',text:'How is this channel not bigger yet?!',                   likes:'529', time:'8h'},
-    {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@rhythmkids',      initials:'RK',text:'I wish I had this growing up 🎶',                        likes:'970', time:'3d'},
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@colorfulkid_mom', initials:'CK',text:'We play the playlist on every road trip 🚗🎵',           likes:'1.8K',time:'12h'},
-    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@designerdad',     initials:'DD',text:'The neon palette is so well done fr',                    likes:'654', time:'1d'},
+    {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@rhythmkids',      initials:'RK',text:'I wish I had this growing up 🎶',                        likes:'970', time:'3d',  photo:'https://randomuser.me/api/portraits/women/12.jpg'},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@colorfulkid_mom', initials:'CK',text:'We play the playlist on every road trip 🚗🎵',           likes:'1.8K',time:'12h', photo:'https://randomuser.me/api/portraits/women/26.jpg'},
+    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@designerdad',     initials:'DD',text:'The neon palette is so well done fr',                    likes:'654', time:'1d',  photo:'https://randomuser.me/api/portraits/men/76.jpg'},
     {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@schoolteacher',   initials:'ST',text:'Using this in class, kids are obsessed 🎉',              likes:'391', time:'2d'},
     {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@animelover_jr',   initials:'AL',text:'The characters move like they have actual soul',         likes:'1.3K',time:'5h'},
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@SuburbVibesMom',  initials:'SV',text:'First channel my toddler asks for by name',              likes:'2.7K',time:'30m'},
-    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@tinycreatorsclub',initials:'TC',text:'Would love a coloring book of these characters! 🖍️',   likes:'845', time:'4h'},
-    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@familynetwork_',  initials:'FN',text:'My daughter memorized every lyric in one day. ONE DAY.', likes:'4.1K',time:'2h'},
-    {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@musicteacher_mx', initials:'MT',text:'Using BeatBlox tracks for music class. Kids love it',   likes:'2.2K',time:'6h'},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@SuburbVibesMom',  initials:'SV',text:'First channel my toddler asks for by name',              likes:'2.7K',time:'30m', light:true, photo:'https://randomuser.me/api/portraits/women/55.jpg'},
+    {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@tinycreatorsclub',initials:'TC',text:'Would love a coloring book of these characters! 🖍️',   likes:'845', time:'4h',  light:true},
+    {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@familynetwork_',  initials:'FN',text:'My daughter memorized every lyric in one day. ONE DAY.', likes:'4.1K',time:'2h',  photo:'https://randomuser.me/api/portraits/women/33.jpg'},
+    {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@musicteacher_mx', initials:'MT',text:'Using BeatBlox tracks for music class. Kids love it',   likes:'2.2K',time:'6h',  photo:'https://randomuser.me/api/portraits/men/41.jpg'},
     {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@parentingblog',   initials:'PB',text:'Rare content: educational AND genuinely fun 🙌',          likes:'1.6K',time:'1d'},
-    {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@kidsyoutubefans', initials:'KY',text:'Subscribe. Trust me. Your kids will thank you',           likes:'733', time:'3h'},
+    {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@kidsyoutubefans', initials:'KY',text:'Subscribe. Trust me. Your kids will thank you',           likes:'733', time:'3h',  light:true, photo:'https://randomuser.me/api/portraits/women/19.jpg'},
     {platform:'YouTube',  color:'#FF0033',rgb:'255,0,51',  user:'@toddlerparent22', initials:'TP',text:'My 3 year old literally dances every time this plays 💃', likes:'5.3K',time:'45m'},
     {platform:'TikTok',   color:'#00F2EA',rgb:'0,242,234', user:'@hiphopkidz',      initials:'HK',text:'Finally a kids channel with actual taste in music',       likes:'3.8K',time:'2h'},
     {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@creativemom_',    initials:'CM',text:'The visuals alone are worth following for 🎨',            likes:'921', time:'9h'},
     {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@parentcommunity', initials:'PC',text:'Tagged 5 other parents. We all agree: this is it.',       likes:'612', time:'1d'},
   ];
   function makeCard(c){
-    return `<div class="comment-card" style="--cc-color:${c.color};--cc-rgb:${c.rgb}"><div class="cc-meta"><div class="cc-avatar" style="background:rgba(${c.rgb},.18);color:${c.color}">${c.initials}</div><div class="cc-info"><span class="cc-user">${c.user}</span><span class="cc-platform-badge"><span class="cc-platform-dot"></span>${c.platform}</span></div></div><p class="cc-text">${c.text}</p><div class="cc-footer"><span class="cc-likes"><span class="cc-likes-heart">♥</span> ${c.likes}</span><span class="cc-time">${c.time} ago</span></div></div>`;
+    const cls = c.light ? 'comment-card light' : 'comment-card';
+    const avatarInner = c.photo
+      ? `<img src="${c.photo}" alt="${c.user}" loading="lazy">`
+      : c.initials;
+    const avatarStyle = c.photo ? '' : ` style="background:rgba(${c.rgb},.18);color:${c.color}"`;
+    return `<div class="${cls}" style="--cc-color:${c.color};--cc-rgb:${c.rgb}"><div class="cc-meta"><div class="cc-avatar"${avatarStyle}>${avatarInner}</div><div class="cc-info"><span class="cc-user">${c.user}</span><span class="cc-platform-badge"><span class="cc-platform-dot"></span>${c.platform}</span></div></div><p class="cc-text">${c.text}</p><div class="cc-footer"><span class="cc-likes"><span class="cc-likes-heart">♥</span> ${c.likes}</span><span class="cc-time">${c.time} ago</span></div></div>`;
   }
   const cols=[[],[],[]];
   comments.forEach((c,i)=>cols[i%3].push(c));
