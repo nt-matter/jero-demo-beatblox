@@ -1374,7 +1374,7 @@
     .p-metric { font-family:'Bungee',sans-serif; font-size:clamp(1.4rem,2.5vw,2.2rem); color:#fff; line-height:1; display:block; margin-bottom:12px; }
     .p-desc { font-size:.78rem; color:rgba(255,255,255,.35); line-height:1.65; font-weight:400; }
     .comment-feed { display:grid; grid-template-columns:repeat(3,1fr); gap:0 12px; height:560px; overflow:hidden; padding:0 56px 72px; max-width:1360px; margin:0 auto; mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); -webkit-mask-image:linear-gradient(to bottom, transparent 0%, black 10%, black 86%, transparent 100%); }
-    .cf-col { display:flex; flex-direction:column; gap:10px; will-change:transform; }
+    .cf-col { display:flex; flex-direction:column; gap:0; will-change:transform; }
     .cf-col-0 { animation:cfUp 28s linear infinite; }
     .cf-col-1 { animation:cfUp 36s linear infinite; animation-delay:-10s; }
     .cf-col-2 { animation:cfUp 22s linear infinite; animation-delay:-5s; }
@@ -2077,10 +2077,10 @@ function onYouTubeIframeAPIReady(){
       scrollTrigger: {
         trigger: '.hero',
         start: 'top top',
-        end: '+=120%',
+        end: 'bottom bottom',
         scrub: 0.6,
         pin: '.hero-pin',
-        pinSpacing: true,
+        pinSpacing: false,   // .hero ya tiene height:220vh — sin spacer extra
         anticipatePin: 1
       }
     })
@@ -2101,7 +2101,7 @@ function onYouTubeIframeAPIReady(){
     ScrollTrigger.create({
       trigger: '.hero',
       start: 'top top',
-      end: '+=120%',
+      end: 'bottom bottom',
       onUpdate: function(self){
         if (nav) nav.classList.toggle('nav-revealed', self.progress > 0.55);
       }
@@ -2367,13 +2367,16 @@ function onYouTubeIframeAPIReady(){
     {platform:'Instagram',color:'#FF1E9E',rgb:'255,30,158',user:'@creativemom_',    initials:'CM',text:'The visuals alone are worth following for 🎨',            likes:'921', time:'9h'},
     {platform:'Facebook', color:'#00B7FF',rgb:'0,183,255', user:'@parentcommunity', initials:'PC',text:'Tagged 5 other parents. We all agree: this is it.',       likes:'612', time:'1d'},
   ];
+  const _mbPattern = [16,36,10,28,20,44,12,32,18,40,14,24,34,10,30,20,42,14,22,36,10];
+  let _mbIdx = 0;
   function makeCard(c){
     const cls = c.light ? 'comment-card light' : 'comment-card';
+    const mb  = _mbPattern[_mbIdx++ % _mbPattern.length];
     const avatarInner = c.photo
       ? `<img src="${c.photo}" alt="${c.user}" loading="lazy">`
       : c.initials;
     const avatarStyle = c.photo ? '' : ` style="background:rgba(${c.rgb},.18);color:${c.color}"`;
-    return `<div class="${cls}" style="--cc-color:${c.color};--cc-rgb:${c.rgb}"><div class="cc-meta"><div class="cc-avatar"${avatarStyle}>${avatarInner}</div><div class="cc-info"><span class="cc-user">${c.user}</span><span class="cc-platform-badge"><span class="cc-platform-dot"></span>${c.platform}</span></div></div><p class="cc-text">${c.text}</p><div class="cc-footer"><span class="cc-likes"><span class="cc-likes-heart">♥</span> ${c.likes}</span><span class="cc-time">${c.time} ago</span></div></div>`;
+    return `<div class="${cls}" style="--cc-color:${c.color};--cc-rgb:${c.rgb};margin-bottom:${mb}px"><div class="cc-meta"><div class="cc-avatar"${avatarStyle}>${avatarInner}</div><div class="cc-info"><span class="cc-user">${c.user}</span><span class="cc-platform-badge"><span class="cc-platform-dot"></span>${c.platform}</span></div></div><p class="cc-text">${c.text}</p><div class="cc-footer"><span class="cc-likes"><span class="cc-likes-heart">♥</span> ${c.likes}</span><span class="cc-time">${c.time} ago</span></div></div>`;
   }
   const cols=[[],[],[]];
   comments.forEach((c,i)=>cols[i%3].push(c));
