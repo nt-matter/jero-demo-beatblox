@@ -1517,6 +1517,33 @@
     }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.12} }
 
+    /* ─── GLOBAL SOUND TOGGLE ────────────────────────────── */
+    .bb-sound-btn {
+      position: fixed;
+      bottom: 28px; left: 28px;
+      z-index: 999;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: rgba(8,8,8,.75);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: border-color .3s, background .3s, transform .25s;
+    }
+    .bb-sound-btn:hover { transform: scale(1.08); }
+    .bb-sound-btn.sound-on {
+      border-color: var(--green);
+      background: rgba(183,255,0,.12);
+      box-shadow: 0 0 18px rgba(183,255,0,.25);
+    }
+    .bb-sound-btn.sound-on  .bsb-off { display: none; }
+    .bb-sound-btn.sound-off .bsb-on  { display: none; }
+    .bb-sound-btn svg { width: 20px; height: 20px; display: block; }
+    .bb-sound-btn.sound-on  svg { stroke: var(--green); }
+    .bb-sound-btn.sound-off svg { stroke: rgba(255,255,255,.45); }
+
     /* ─── RESPONSIVE ──────────────────────────────────── */
     @media (max-width: 900px) {
       /* ── navbar ── */
@@ -1948,6 +1975,21 @@
   <div class="foot-dot"></div>
 </footer>
 
+<!-- ══════════════════════ GLOBAL SOUND TOGGLE -->
+<button class="bb-sound-btn sound-on" id="bbSoundBtn" aria-label="Mute all videos" title="Toggle sound">
+  <!-- sound ON icon -->
+  <svg class="bsb-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+  </svg>
+  <!-- sound OFF icon -->
+  <svg class="bsb-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <line x1="23" y1="9" x2="17" y2="15"/>
+    <line x1="17" y1="9" x2="23" y2="15"/>
+  </svg>
+</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -2202,22 +2244,27 @@ function onYouTubeIframeAPIReady(){
   }
   function fill(id,data){const el=document.getElementById(id);el.innerHTML=data.map(buildCard).join('')+data.map(buildCard).join('');}
   fill('carRow1',row1Data); fill('carRow2',row2Data);
-  // activar hover-to-play en todos los cards con video (shorts y horizontales)
+  // activar hover-to-play (con delay 800ms + audio según estado global)
   document.querySelectorAll('[data-vid]').forEach(card=>{
     const vid=card.dataset.vid, layer=card.querySelector('.car-video-layer');
     if(!layer) return;
-    let t;
+    let t, tPlay;
     card.addEventListener('mouseenter',()=>{
       clearTimeout(t);
-      if(!layer.querySelector('iframe')){
-        const f=document.createElement('iframe');
-        f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
-        f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true');
-        layer.appendChild(f);
-      }
-      requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
+      clearTimeout(tPlay);
+      tPlay=setTimeout(()=>{
+        if(!layer.querySelector('iframe')){
+          const f=document.createElement('iframe');
+          const m=window.bbMuted?1:0;
+          f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=${m}&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
+          f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true');
+          layer.appendChild(f);
+        }
+        requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
+      },800);
     });
     card.addEventListener('mouseleave',()=>{
+      clearTimeout(tPlay);
       card.classList.remove('video-playing');
       t=setTimeout(()=>{const f=layer.querySelector('iframe');if(f)f.remove();},600);
     });
@@ -2241,18 +2288,23 @@ function onYouTubeIframeAPIReady(){
   }).join('');
   grid.querySelectorAll('.has-video').forEach(card=>{
     const vid=card.dataset.video, layer=card.querySelector('.wg-video-layer');
-    let t;
+    let t, tPlay;
     card.addEventListener('mouseenter',()=>{
       clearTimeout(t);
-      if(!layer.querySelector('iframe')){
-        const f=document.createElement('iframe');
-        f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
-        f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true'); f.style.cssText='border:none;';
-        layer.appendChild(f);
-      }
-      requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
+      clearTimeout(tPlay);
+      tPlay=setTimeout(()=>{
+        if(!layer.querySelector('iframe')){
+          const f=document.createElement('iframe');
+          const m=window.bbMuted?1:0;
+          f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=${m}&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
+          f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true'); f.style.cssText='border:none;';
+          layer.appendChild(f);
+        }
+        requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
+      },800);
     });
     card.addEventListener('mouseleave',()=>{
+      clearTimeout(tPlay);
       card.classList.remove('video-playing');
       t=setTimeout(()=>{const f=layer.querySelector('iframe');if(f)f.remove();},650);
     });
@@ -2352,6 +2404,31 @@ function onYouTubeIframeAPIReady(){
       e.preventDefault();
       const target = document.getElementById(a.dataset.section);
       if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+})();
+
+/* ══════════════ GLOBAL SOUND STATE + TOGGLE */
+window.bbMuted = false; // audio ON por default
+
+(function(){
+  const btn = document.getElementById('bbSoundBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    window.bbMuted = !window.bbMuted;
+    btn.classList.toggle('sound-on',  !window.bbMuted);
+    btn.classList.toggle('sound-off',  window.bbMuted);
+    btn.setAttribute('aria-label', window.bbMuted ? 'Unmute all videos' : 'Mute all videos');
+
+    /* recargar iframes activos con el nuevo estado de mute */
+    document.querySelectorAll('.video-playing iframe').forEach(f => {
+      if (!f.src) return;
+      if (window.bbMuted) {
+        f.src = f.src.replace('mute=0', 'mute=1');
+      } else {
+        f.src = f.src.replace('mute=1', 'mute=0');
+      }
     });
   });
 })();
