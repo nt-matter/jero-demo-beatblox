@@ -753,11 +753,11 @@
     }
     .car-left  .car-track { animation: mLeft  22s linear infinite; }
     .car-right .car-track { animation: mRight 26s linear infinite; }
-    .work-carousel:hover .car-track { animation-play-state: paused; }
+    .car-track:hover { animation-play-state: paused; }
 
     .car-card {
       flex-shrink:0;
-      width: 420px; height: 340px;
+      width: 420px; height: 280px;
       position: relative;
       overflow: hidden;
       cursor: pointer;
@@ -989,19 +989,71 @@
       display: grid; grid-template-columns: 1fr 1.3fr; gap: 72px; align-items: center;
     }
     .meet-visual {
-      position: relative; overflow: hidden;
-      border: 1px solid rgba(255,255,255,.09);
+      position: relative; overflow: visible;
       background: #000;
+    }
+    .meet-visual-inner {
+      position: relative; overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 0 0 1px rgba(255,30,158,.08), 0 8px 48px rgba(0,0,0,.6), 0 0 60px rgba(255,30,158,.06);
     }
     .meet-visual::after {
       content:''; position:absolute; inset:0;
       background: linear-gradient(135deg, rgba(255,30,158,.06) 0%, rgba(0,240,255,.04) 100%);
-      pointer-events:none;
+      pointer-events:none; z-index:1;
+    }
+    /* corner viewfinder brackets */
+    .meet-frame {
+      position: absolute;
+      inset: -10px;
+      pointer-events: none;
+      z-index: 4;
+      background:
+        linear-gradient(var(--pink), var(--pink)) top    left  / 2px 28px no-repeat,
+        linear-gradient(var(--pink), var(--pink)) top    left  / 28px 2px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) top    right / 2px 28px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) top    right / 28px 2px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) bottom left  / 2px 28px no-repeat,
+        linear-gradient(var(--cyan), var(--cyan)) bottom left  / 28px 2px no-repeat,
+        linear-gradient(var(--pink), var(--pink)) bottom right / 2px 28px no-repeat,
+        linear-gradient(var(--pink), var(--pink)) bottom right / 28px 2px no-repeat;
+      filter: drop-shadow(0 0 5px var(--pink)) drop-shadow(0 0 12px var(--cyan));
+      opacity: .7;
+      transition: opacity .4s, filter .4s;
+    }
+    .meet-visual:hover .meet-frame {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px var(--pink)) drop-shadow(0 0 20px var(--cyan));
+    }
+    /* REC badge */
+    .meet-rec {
+      position: absolute; top: 14px; right: 14px; z-index: 5;
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'Space Mono', monospace; font-size: .6rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.8);
+      background: rgba(0,0,0,.55); border: 1px solid rgba(255,30,158,.4);
+      padding: 4px 10px; backdrop-filter: blur(6px);
+    }
+    .meet-rec-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 8px var(--pink);
+      animation: recBlink 1.4s ease-in-out infinite;
+    }
+    @keyframes recBlink { 0%,100%{opacity:1} 50%{opacity:.2} }
+    /* timecode bar at bottom */
+    .meet-timecode {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 5;
+      padding: 8px 14px;
+      font-family: 'Space Mono', monospace; font-size: .58rem; letter-spacing: 1.5px;
+      color: rgba(255,255,255,.45);
+      background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 100%);
+      display: flex; justify-content: space-between;
     }
     .meet-thumb-link { display:block; position:relative; text-decoration:none; }
     .meet-thumb {
-      width:100%; aspect-ratio:16/9;
-      background-size:cover; background-position:center;
+      width:100%; aspect-ratio:4/3;
+      background-size:cover; background-position:center top;
       transition: transform .6s;
     }
     .meet-visual:hover .meet-thumb { transform: scale(1.04); }
@@ -1322,28 +1374,6 @@
     }
     .car-card:hover .car-thumb { opacity:1; }
     .car-card.video-playing .car-thumb { opacity:0; }
-
-    /* ── corner viewfinder frame on horizontal cards ── */
-    .car-frame {
-      position: absolute;
-      inset: 14px;
-      pointer-events: none;
-      z-index: 3;
-      background:
-        linear-gradient(var(--card-glow), var(--card-glow)) top    left  / 2px 22px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) top    left  / 22px 2px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) top    right / 2px 22px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) top    right / 22px 2px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) bottom left  / 2px 22px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) bottom left  / 22px 2px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) bottom right / 2px 22px no-repeat,
-        linear-gradient(var(--card-glow), var(--card-glow)) bottom right / 22px 2px no-repeat;
-      opacity: 0;
-      transition: opacity .4s;
-      filter: drop-shadow(0 0 6px var(--card-glow)) drop-shadow(0 0 14px var(--card-glow));
-    }
-    .car-card:hover .car-frame      { opacity: 1; }
-    .car-card.video-playing .car-frame { opacity: 0; }
 
     /* ─── WHY BEATBLOX STUDIO ────────────────────────── */
     .why-section {
@@ -1714,10 +1744,15 @@
 <section class="meet-section">
   <div class="meet-inner">
     <div class="meet-visual">
-      <a href="https://www.youtube.com/watch?v=ILU3mWBxMBY" target="_blank" class="meet-thumb-link">
-        <div class="meet-thumb" style="background-image:url(https://img.youtube.com/vi/ILU3mWBxMBY/maxresdefault.jpg)"></div>
-        <div class="meet-play-btn">▶</div>
-      </a>
+      <div class="meet-frame"></div>
+      <div class="meet-visual-inner">
+        <a href="https://www.youtube.com/watch?v=ILU3mWBxMBY" target="_blank" class="meet-thumb-link">
+          <div class="meet-thumb" style="background-image:url(https://img.youtube.com/vi/ILU3mWBxMBY/maxresdefault.jpg)"></div>
+          <div class="meet-play-btn">▶</div>
+          <div class="meet-rec"><span class="meet-rec-dot"></span>REC</div>
+          <div class="meet-timecode"><span>00:00:00:00</span><span>BeatBlox Studio · 2026</span></div>
+        </a>
+      </div>
     </div>
     <div class="meet-content">
       <span class="sec-label">/ Original Project</span>
@@ -2269,9 +2304,8 @@ function onYouTubeIframeAPIReady(){
       : `<div class="car-card-bg"></div>`;
     const vl    = hasVid ? `<div class="car-video-layer"></div>` : '';
     const badge = isShort ? `<div class="car-shorts-badge">Shorts</div>` : '';
-    const frame = !isShort ? `<div class="car-frame"></div>` : '';
     const cls   = `car-card${isShort ? ' has-car-video' : ''}`;
-    return `<div class="${cls}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${hasVid?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${frame}${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
+    return `<div class="${cls}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${hasVid?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
   }
   function fill(id,data){const el=document.getElementById(id);el.innerHTML=data.map(buildCard).join('')+data.map(buildCard).join('');}
   fill('carRow1',row1Data); fill('carRow2',row2Data);
