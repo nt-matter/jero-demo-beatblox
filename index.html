@@ -2039,7 +2039,7 @@
 </footer>
 
 <!-- ══════════════════════ GLOBAL SOUND TOGGLE -->
-<button class="bb-sound-btn sound-on" id="bbSoundBtn" aria-label="Mute all videos" title="Toggle sound">
+<button class="bb-sound-btn sound-off" id="bbSoundBtn" aria-label="Unmute all videos" title="Toggle sound">
   <!-- sound ON icon -->
   <svg class="bsb-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
     <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -2323,11 +2323,6 @@ function onYouTubeIframeAPIReady(){
           // siempre mute=1 para que el autoplay funcione; desmutear vía postMessage
           f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&enablejsapi=1&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
           f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true');
-          if(!window.bbMuted){
-            f.addEventListener('load',()=>{
-              setTimeout(()=>{ try{ f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*'); f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[80]}','*'); }catch(e){} },1200);
-            });
-          }
           layer.appendChild(f);
         }
         requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
@@ -2367,11 +2362,6 @@ function onYouTubeIframeAPIReady(){
           const f=document.createElement('iframe');
           f.src=`https://www.youtube-nocookie.com/embed/${vid}?autoplay=1&mute=1&enablejsapi=1&loop=1&controls=0&rel=0&modestbranding=1&playlist=${vid}&playsinline=1&disablekb=1&fs=0&iv_load_policy=3&origin=${location.origin}`;
           f.allow='autoplay; encrypted-media'; f.setAttribute('tabindex','-1'); f.setAttribute('aria-hidden','true'); f.style.cssText='border:none;';
-          if(!window.bbMuted){
-            f.addEventListener('load',()=>{
-              setTimeout(()=>{ try{ f.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}','*'); f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[80]}','*'); }catch(e){} },1200);
-            });
-          }
           layer.appendChild(f);
         }
         requestAnimationFrame(()=>requestAnimationFrame(()=>card.classList.add('video-playing')));
@@ -2486,7 +2476,7 @@ function onYouTubeIframeAPIReady(){
 })();
 
 /* ══════════════ GLOBAL SOUND STATE + TOGGLE */
-window.bbMuted = false; // audio ON por default
+window.bbMuted = true; // muted por default — audio se activa con el botón
 
 (function(){
   const btn = document.getElementById('bbSoundBtn');
