@@ -757,7 +757,7 @@
 
     .car-card {
       flex-shrink:0;
-      width: 420px; height: 280px;
+      width: 420px; height: 340px;
       position: relative;
       overflow: hidden;
       cursor: pointer;
@@ -1322,6 +1322,28 @@
     }
     .car-card:hover .car-thumb { opacity:1; }
     .car-card.video-playing .car-thumb { opacity:0; }
+
+    /* ── corner viewfinder frame on horizontal cards ── */
+    .car-frame {
+      position: absolute;
+      inset: 14px;
+      pointer-events: none;
+      z-index: 3;
+      background:
+        linear-gradient(var(--card-glow), var(--card-glow)) top    left  / 2px 22px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) top    left  / 22px 2px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) top    right / 2px 22px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) top    right / 22px 2px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) bottom left  / 2px 22px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) bottom left  / 22px 2px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) bottom right / 2px 22px no-repeat,
+        linear-gradient(var(--card-glow), var(--card-glow)) bottom right / 22px 2px no-repeat;
+      opacity: 0;
+      transition: opacity .4s;
+      filter: drop-shadow(0 0 6px var(--card-glow)) drop-shadow(0 0 14px var(--card-glow));
+    }
+    .car-card:hover .car-frame      { opacity: 1; }
+    .car-card.video-playing .car-frame { opacity: 0; }
 
     /* ─── WHY BEATBLOX STUDIO ────────────────────────── */
     .why-section {
@@ -2247,8 +2269,9 @@ function onYouTubeIframeAPIReady(){
       : `<div class="car-card-bg"></div>`;
     const vl    = hasVid ? `<div class="car-video-layer"></div>` : '';
     const badge = isShort ? `<div class="car-shorts-badge">Shorts</div>` : '';
+    const frame = !isShort ? `<div class="car-frame"></div>` : '';
     const cls   = `car-card${isShort ? ' has-car-video' : ''}`;
-    return `<div class="${cls}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${hasVid?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
+    return `<div class="${cls}" style="--c1:${d.c1};--c2:${d.c2};--card-glow:${d.glow}"${hasVid?` data-vid="${d.videoId}"`:''}>${thumb}${vl}<div class="car-card-overlay"></div><div class="car-card-accent"></div>${frame}${badge}<div class="car-play">▶</div><div class="car-card-info"><div class="car-cat">${d.cat}</div><div class="car-title">${d.title}</div></div></div>`;
   }
   function fill(id,data){const el=document.getElementById(id);el.innerHTML=data.map(buildCard).join('')+data.map(buildCard).join('');}
   fill('carRow1',row1Data); fill('carRow2',row2Data);
